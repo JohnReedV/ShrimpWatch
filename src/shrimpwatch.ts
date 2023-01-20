@@ -3,7 +3,7 @@ const conf = require('../conf')
 import { Utils } from './Utils'
 import { Transfer } from './transfer'
 
-class ShrimpWatch {
+export class ShrimpWatch {
     web3: any
     utils: Utils
     transfer: Transfer
@@ -41,9 +41,3 @@ class ShrimpWatch {
         }
     }
 }
-
-function main() {
-    let shrimp: ShrimpWatch = new ShrimpWatch();
-    shrimp.start();
-}
-main()
