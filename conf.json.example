@@ -1,4 +1,4 @@
 {
     "httpProvider": "http://localhost:8545",
-    "startblock": 0
+    "startblock": 1
 }
