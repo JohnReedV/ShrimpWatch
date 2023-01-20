@@ -1,0 +1,1 @@
+start with `npx ts-node main.ts`
