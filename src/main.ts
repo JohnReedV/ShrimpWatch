@@ -1,14 +1,17 @@
 const Web3 = require('web3')
 const conf = require('../conf')
 import { Utils } from './Utils'
+import { Transfer } from './transfer'
 
 class ShrimpWatch {
     web3: any
     utils: Utils
+    transfer: Transfer
 
     constructor() {
         this.web3 = new Web3(new Web3.providers.HttpProvider(conf.httpProvider))
         this.utils = new Utils()
+        this.transfer = new Transfer()
     }
 
     async start() {
@@ -25,8 +28,13 @@ class ShrimpWatch {
 
             let currentBlock = await this.web3.eth.getBlock(currentBlockNumber)
             for (let i = 0; i < currentBlock.transactions.length; i++) {
-                let transaction = await this.web3.eth.getTransactionReceipt(currentBlock.transactions[i])
-                console.log(transaction)
+                let transaction = await this.web3.eth.getTransaction(currentBlock.transactions[i])
+                if (transaction.input === '0x' && transaction.value > 0) {
+                    //regular eth transfer
+                    this.transfer.handleTransfer(currentBlock.transactions[i], this.web3)
+                } else if (transaction.input.startsWith('0xa9059cbb')) {
+                    // erc20 transfer
+                }
             }
 
             currentBlockNumber++
