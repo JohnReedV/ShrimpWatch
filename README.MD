@@ -1,1 +1,1 @@
-start with `npx ts-node main.ts`
+start with `node src/shrimpwatch.js`
