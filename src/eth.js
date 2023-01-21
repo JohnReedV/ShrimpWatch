@@ -1,19 +1,23 @@
 import Web3 from 'web3'
-import { Utils } from './utils.js'
 import * as fs from 'fs';
+import { Utils } from './utils.js'
+import { DBHandler } from './dbHandler.js';
 
 export class Eth {
     conf
     web3
     utils
+    db
 
     constructor() {
         this.conf = JSON.parse(fs.readFileSync('./conf.json', 'utf8'))
         this.web3 = new Web3(new Web3.providers.HttpProvider(this.conf.httpProvider))
         this.utils = new Utils()
+        this.db = new DBHandler()
     }
 
     async startEth() {
+        console.log("eth on")
         let currentBlockNumber = this.conf.startblock
         while (true) {
             let latestBlock = await this.web3.eth.getBlock('latest')
@@ -30,7 +34,7 @@ export class Eth {
                 let transaction = await this.web3.eth.getTransaction(currentBlock.transactions[i])
                 if (transaction.input === '0x' && transaction.value > 0) {
                     //regular eth transfer
-                    this.handleTransfer(currentBlock.transactions[i], this.web3)
+                    this.handleTransfer(currentBlock.transactions[i], transaction, this.web3)
                 } else if (transaction.input.startsWith('0xa9059cbb')) {
                     // erc20 transfer
                 }
@@ -41,7 +45,7 @@ export class Eth {
         }
     }
 
-    async handleTransfer(transactionHash, web3) {
+    async handleTransfer(transactionHash, transaction, web3) {
         const rawTransaction = await web3.eth.getTransactionReceipt(transactionHash)
         if (await this.isContract(rawTransaction.to, web3)) {
             //transfer to contract
@@ -49,6 +53,7 @@ export class Eth {
             //transfer from contract
         } else {
             // regular transfer
+            this.db.fillTransaction(transaction, rawTransaction)
         }
     }
 

@@ -1,6 +1,6 @@
 class Btc {
     async startBtc() {
-        while (true) console.log('test')
+        console.log('btc on')
     }
 }
 
