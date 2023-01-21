@@ -1,15 +1,33 @@
 generator client {
-  provider        = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 model transaction {
-      id           String @unique //ID is txHash
-      from         String?
-      to           String?
-      blockHash    String?
+    id                String  @unique //ID is txHash
+    from              String?
+    to                String?
+    blockHash         String?
+    blockNumber       String?
+    baseFeePerGas     String?
+    gasUsed           String?
+    gasPrice          String?
+    feePerGas         String?
+    priorityFeeperGas String?
+    chain             String?
+    type              String?
+    fromWallet        wallet? @relation(fields: [from], references: [id], name: "fromwallet")
+    toWallet          wallet? @relation(fields: [to], references: [id], name: "towallet")
+}
+
+model wallet {
+    id              String @unique //ID is public key
+    balance         String?
+    nonce           String?
+    transactionFrom transaction[] @relation(name: "fromwallet")
+    transactionTo   transaction[] @relation(name: "towallet")
 }

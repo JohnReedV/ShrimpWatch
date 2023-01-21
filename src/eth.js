@@ -34,7 +34,7 @@ export class Eth {
                 let transaction = await this.web3.eth.getTransaction(currentBlock.transactions[i])
                 if (transaction.input === '0x' && transaction.value > 0) {
                     //regular eth transfer
-                    this.handleTransfer(currentBlock.transactions[i], transaction, this.web3)
+                    await this.handleTransfer(transaction, currentBlock, this.web3)
                 } else if (transaction.input.startsWith('0xa9059cbb')) {
                     // erc20 transfer
                 }
@@ -45,15 +45,16 @@ export class Eth {
         }
     }
 
-    async handleTransfer(transactionHash, transaction, web3) {
-        const rawTransaction = await web3.eth.getTransactionReceipt(transactionHash)
+    async handleTransfer(transaction, block, web3) {
+        const rawTransaction = await web3.eth.getTransactionReceipt(transaction.hash)
         if (await this.isContract(rawTransaction.to, web3)) {
             //transfer to contract
         } else if (await this.isContract(rawTransaction.from, web3)) {
             //transfer from contract
         } else {
             // regular transfer
-            this.db.fillTransaction(transaction, rawTransaction)
+            await this.db.fillWalletEth(transaction, web3)
+            await this.db.fillTransactionEth(transaction, rawTransaction, block)
         }
     }
 
