@@ -49,12 +49,16 @@ export class Eth {
         const rawTransaction = await web3.eth.getTransactionReceipt(transaction.hash)
         if (await this.isContract(rawTransaction.to, web3)) {
             //transfer to contract
+            await this.db.fillWalletEth(transaction, web3, "toContract")
+            await this.db.fillTransactionEth(transaction, rawTransaction, block, "toContract")
         } else if (await this.isContract(rawTransaction.from, web3)) {
             //transfer from contract
+            await this.db.fillWalletEth(transaction, web3, "fromContract")
+            await this.db.fillTransactionEth(transaction, rawTransaction, block, "fromContract")
         } else {
             // regular transfer
-            await this.db.fillWalletEth(transaction, web3)
-            await this.db.fillTransactionEth(transaction, rawTransaction, block)
+            await this.db.fillWalletEth(transaction, web3, "regular")
+            await this.db.fillTransactionEth(transaction, rawTransaction, block, "regular")
         }
     }
 

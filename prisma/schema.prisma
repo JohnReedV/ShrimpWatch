@@ -18,10 +18,11 @@ model transaction {
     gasPrice          String?
     feePerGas         String?
     priorityFeeperGas String?
+    timeStamp         String? //block timestamp
     chain             String?
     type              String?
-    fromWallet        wallet? @relation(fields: [from], references: [id], name: "fromwallet")
-    toWallet          wallet? @relation(fields: [to], references: [id], name: "towallet")
+    fromWallet        wallet? @relation(fields: [from], references: [id], name: "fromwallet", onDelete: NoAction, onUpdate: NoAction)
+    toWallet          wallet? @relation(fields: [to], references: [id], name: "towallet", onDelete: NoAction, onUpdate: NoAction)
 }
 
 model wallet {

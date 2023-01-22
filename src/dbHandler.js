@@ -7,41 +7,77 @@ export class DBHandler {
         this.prisma = new PrismaClient()
     }
 
-    async fillWalletEth(transaction, web3) {
+    async fillWalletEth(transaction, web3, type) {
 
-        const nonceTo = await web3.eth.getTransactionCount(transaction.to, 'latest')
-        const blanceTo = await web3.eth.getBalance(transaction.to)
-        const nonceFrom = await web3.eth.getTransactionCount(transaction.from, 'latest')
-        const blanceFrom = await web3.eth.getBalance(transaction.from)
+        if (type == "toContract") {
+            const nonceFrom = await web3.eth.getTransactionCount(transaction.from, 'latest')
+            const blanceFrom = await web3.eth.getBalance(transaction.from)
 
-        await this.prisma.wallet.create({
-            data: {
-                id: transaction.to.toLowerCase(),
-                balance: blanceTo.toString(),
-                nonce: nonceTo.toString()
-                
-            }
-        }).then(async () => {
-            await this.prisma.$disconnect()
-        }).catch(async (e) => {
-            await this.prisma.$disconnect()
-        })
+            await this.prisma.wallet.create({
+                data: {
+                    id: transaction.from.toLowerCase(),
+                    balance: blanceFrom.toString(),
+                    nonce: nonceFrom.toString()
 
-        await this.prisma.wallet.create({
-            data: {
-                id: transaction.from.toLowerCase(),
-                balance: blanceFrom.toString(),
-                nonce: nonceFrom.toString()
-                
-            }
-        }).then(async () => {
-            await this.prisma.$disconnect()
-        }).catch(async (e) => {
-            await this.prisma.$disconnect()
-        })
+                }
+            }).then(async () => {
+                await this.prisma.$disconnect()
+            }).catch(async (e) => {
+                await this.prisma.$disconnect()
+            })
+
+        } else if (type == "fromContract") {
+            const nonceTo = await web3.eth.getTransactionCount(transaction.to, 'latest')
+            const blanceTo = await web3.eth.getBalance(transaction.to)
+
+            await this.prisma.wallet.create({
+                data: {
+                    id: transaction.to.toLowerCase(),
+                    balance: blanceTo.toString(),
+                    nonce: nonceTo.toString()
+
+                }
+            }).then(async () => {
+                await this.prisma.$disconnect()
+            }).catch(async (e) => {
+                await this.prisma.$disconnect()
+            })
+
+        } else if (type == "regular") {
+            const nonceTo = await web3.eth.getTransactionCount(transaction.to, 'latest')
+            const blanceTo = await web3.eth.getBalance(transaction.to)
+            const nonceFrom = await web3.eth.getTransactionCount(transaction.from, 'latest')
+            const blanceFrom = await web3.eth.getBalance(transaction.from)
+
+            await this.prisma.wallet.create({
+                data: {
+                    id: transaction.to.toLowerCase(),
+                    balance: blanceTo.toString(),
+                    nonce: nonceTo.toString()
+
+                }
+            }).then(async () => {
+                await this.prisma.$disconnect()
+            }).catch(async (e) => {
+                await this.prisma.$disconnect()
+            })
+
+            await this.prisma.wallet.create({
+                data: {
+                    id: transaction.from.toLowerCase(),
+                    balance: blanceFrom.toString(),
+                    nonce: nonceFrom.toString()
+
+                }
+            }).then(async () => {
+                await this.prisma.$disconnect()
+            }).catch(async (e) => {
+                await this.prisma.$disconnect()
+            })
+        }
     }
 
-    async fillTransactionEth(transaction, rawTransaction, block) {
+    async fillTransactionEth(transaction, rawTransaction, block, type) {
 
         await this.prisma.transaction.create({
             data: {
@@ -55,13 +91,13 @@ export class DBHandler {
                 gasPrice: transaction.gasPrice,
                 feePerGas: transaction.maxFeePerGas,
                 priorityFeeperGas: transaction.maxPriorityFeePerGas,
+                timeStamp: block.timestamp.toString(),
                 chain: "Ethereum",
-                type: "regular"
+                type: type
             }
         }).then(async () => {
             await this.prisma.$disconnect()
         }).catch(async (e) => {
-            console.log(e)
             await this.prisma.$disconnect()
         })
     }
