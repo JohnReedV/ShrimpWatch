@@ -21,9 +21,9 @@ export class DBHandler {
 
                 }
             }).then(async () => {
-                await this.prisma.$disconnect()
+                this.prisma.$disconnect()
             }).catch(async (e) => {
-                await this.prisma.$disconnect()
+                this.prisma.$disconnect()
             })
 
         } else if (type == "fromContract") {
@@ -38,9 +38,9 @@ export class DBHandler {
 
                 }
             }).then(async () => {
-                await this.prisma.$disconnect()
+                this.prisma.$disconnect()
             }).catch(async (e) => {
-                await this.prisma.$disconnect()
+                this.prisma.$disconnect()
             })
 
         } else if (type == "regular") {
@@ -57,9 +57,9 @@ export class DBHandler {
 
                 }
             }).then(async () => {
-                await this.prisma.$disconnect()
+                this.prisma.$disconnect()
             }).catch(async (e) => {
-                await this.prisma.$disconnect()
+                this.prisma.$disconnect()
             })
 
             await this.prisma.wallet.create({
@@ -70,9 +70,9 @@ export class DBHandler {
 
                 }
             }).then(async () => {
-                await this.prisma.$disconnect()
+                this.prisma.$disconnect()
             }).catch(async (e) => {
-                await this.prisma.$disconnect()
+                this.prisma.$disconnect()
             })
         }
     }
@@ -96,9 +96,9 @@ export class DBHandler {
                 type: type
             }
         }).then(async () => {
-            await this.prisma.$disconnect()
+            this.prisma.$disconnect()
         }).catch(async (e) => {
-            await this.prisma.$disconnect()
+            this.prisma.$disconnect()
         })
     }
 }
