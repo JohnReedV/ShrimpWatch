@@ -1,4 +1,5 @@
 {
     "httpProvider": "http://localhost:8545",
-    "startblock": 1
+    "startblock": 1,
+    "workerPoolSize": 10
 }
