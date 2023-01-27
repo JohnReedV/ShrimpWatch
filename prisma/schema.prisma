@@ -11,6 +11,7 @@ model transaction {
     id                String  @unique //ID is txHash
     from              String?
     to                String?
+    amount            String?
     blockHash         String?
     blockNumber       String?
     baseFeePerGas     String?

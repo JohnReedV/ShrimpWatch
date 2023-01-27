@@ -84,6 +84,7 @@ export class DBHandler {
                 id: transaction.hash,
                 from: transaction.from.toLowerCase(),
                 to: transaction.to.toLowerCase(),
+                amount: transaction.value.toString(),
                 blockHash: transaction.blockHash,
                 blockNumber: transaction.blockNumber.toString(),
                 baseFeePerGas: block.baseFeePerGas.toString(),
