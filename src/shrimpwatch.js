@@ -5,7 +5,7 @@ import Web3 from 'web3'
 class ShrimpWatch {
     async start() {
         const conf = JSON.parse(fs.readFileSync('./conf.json', 'utf8'))
-        const web3 = new Web3(new Web3.providers.HttpProvider(conf.httpProvider))
+        const web3 = new Web3(new Web3.providers.HttpProvider(conf.ethHttpProvider))
         const numWorkers = conf.workerPoolSize
         let workers = []
         let completedBlocks = new Set()

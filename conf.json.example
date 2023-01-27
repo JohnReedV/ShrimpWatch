@@ -1,5 +1,8 @@
 {
-    "httpProvider": "http://localhost:8545",
+    "ethHttpProvider": "http://localhost:8545",
+    "btcHttpProvider": "http://localhost:8540",
+    "btcRpcUser" : "username",
+    "btcRpcPassword": "password",
     "startblock": 1,
     "workerPoolSize": 10
 }

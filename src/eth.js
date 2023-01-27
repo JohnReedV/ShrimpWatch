@@ -11,7 +11,7 @@ class Eth {
 
     constructor() {
         this.conf = JSON.parse(fs.readFileSync('./conf.json', 'utf8'))
-        this.web3 = new Web3(new Web3.providers.HttpProvider(this.conf.httpProvider))
+        this.web3 = new Web3(new Web3.providers.HttpProvider(this.conf.ethHttpProvider))
         this.db = new DBHandler()
 
 

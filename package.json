@@ -19,6 +19,7 @@
   "homepage": "https://github.com/JohnReedV/ShrimpWatch#readme",
   "dependencies": {
     "@prisma/client": "^4.9.0",
+    "axios": "^1.2.5",
     "web3": "^1.8.1"
   }
 }
