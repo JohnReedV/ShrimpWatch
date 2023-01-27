@@ -77,17 +77,17 @@ export class DBHandler {
         }
     }
 
-    async fillTransactionEth(transaction, rawTransaction, block, type) {
+    async fillTransactionEth(transaction, block, type) {
 
         await this.prisma.transaction.create({
             data: {
-                id: rawTransaction.transactionHash,
-                from: rawTransaction.from.toLowerCase(),
-                to: rawTransaction.to.toLowerCase(),
-                blockHash: rawTransaction.blockHash,
-                blockNumber: rawTransaction.blockNumber.toString(),
+                id: transaction.hash,
+                from: transaction.from.toLowerCase(),
+                to: transaction.to.toLowerCase(),
+                blockHash: transaction.blockHash,
+                blockNumber: transaction.blockNumber.toString(),
                 baseFeePerGas: block.baseFeePerGas.toString(),
-                gasUsed: rawTransaction.gasUsed.toString(),
+                gasUsed: transaction.gas.toString(),
                 gasPrice: transaction.gasPrice,
                 feePerGas: transaction.maxFeePerGas,
                 priorityFeeperGas: transaction.maxPriorityFeePerGas,
