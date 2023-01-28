@@ -21,7 +21,7 @@ class ShrimpWatch {
             this.computeBtc(numWorkers, conf)
         } else if (conf.ethOn) {
             this.computeEth(numWorkers, conf)
-        }
+        } else { console.log('uhhh turn something on dude')}
 
     }
 
