@@ -47,7 +47,7 @@ class ShrimpWatch {
                 if (message.done) {
                     // If at top of chain, wait for next block
                     let latestBlockNumber = await btcQ.getBlockHeight()
-                    while (message.blockNumber >= latestBlockNumber) {
+                    while (message.blockNumber + numWorkers > latestBlockNumber) {
                         latestBlockNumber = await btcQ.getBlockHeight()
                     }
                     // reassign work
@@ -86,7 +86,7 @@ class ShrimpWatch {
                     // If at top of chain, wait for next block
                     let latestBlock = await web3.eth.getBlock('latest')
                     let latestBlockNumber = latestBlock.number
-                    while (message.blockNumber >= latestBlockNumber) {
+                    while (message.blockNumber + numWorkers > latestBlockNumber) {
                         latestBlock = await web3.eth.getBlock('latest')
                         latestBlockNumber = latestBlock.number
                     }
