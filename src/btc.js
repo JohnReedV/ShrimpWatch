@@ -33,7 +33,6 @@ class Btc {
             if (!decodedTX.vin[0].coinbase) {
                 let senders = await this.getSenders(rawTX.hex)
                 let receivers = await this.getReceivers(decodedTX)
-                
             } else {
                 //bitcoin mint no sender
                 let receivers = await this.getReceivers(decodedTX)
@@ -46,7 +45,10 @@ class Btc {
     async getReceivers(decodedTX) {
         let receivers = []
         for (let v = 0; v < decodedTX.vout.length; v++) {
-            receivers.push(decodedTX.vout[v].scriptPubKey.address)
+            receivers.push({
+                address: decodedTX.vout[v].scriptPubKey.address,
+                value: decodedTX.vout[v].value
+            })
         }
         return receivers
     }
@@ -60,9 +62,10 @@ class Btc {
             let decodedTX = await this.btcQ.getDecodedTX(oldTransaction)
             let spk = decodedTX.vout[input.outputIndex].scriptPubKey
             if (spk.address) {
-                senders.push(spk.address)
-            } else if (spk.addresses) {
-                senders = senders.concat(spk.address)
+                senders.push({
+                    address: spk.address,
+                    value: decodedTX.vout[input.outputIndex].value
+                })
             }
         }
         return senders
