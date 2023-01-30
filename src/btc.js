@@ -30,12 +30,12 @@ class Btc {
             let rawTX = await this.btcQ.getRawTX(block.tx[i], blockHash)
             let decodedTX = await this.btcQ.getDecodedTX(rawTX.hex)
 
-            if (!decodedTX.vin[0].coinbase) {
+            if (!decodedTX.vin[0].coinbase) { //coinbase transactions are mints with no sender
                 let senders = await this.getSenders(rawTX.hex)
                 let receivers = await this.getReceivers(decodedTX)
-            } else {
-                //bitcoin mint no sender
-                let receivers = await this.getReceivers(decodedTX)
+
+                await this.db.fillTransactionBtc(rawTX, senders, receivers, block)
+                this.db.fillPuts(rawTX.txid, senders, receivers)
             }
         }
 
@@ -47,7 +47,8 @@ class Btc {
         for (let v = 0; v < decodedTX.vout.length; v++) {
             receivers.push({
                 address: decodedTX.vout[v].scriptPubKey.address,
-                value: decodedTX.vout[v].value
+                value: decodedTX.vout[v].value,
+                index: v
             })
         }
         return receivers
@@ -64,7 +65,8 @@ class Btc {
             if (spk.address) {
                 senders.push({
                     address: spk.address,
-                    value: decodedTX.vout[input.outputIndex].value
+                    value: decodedTX.vout[input.outputIndex].value,
+                    index: i
                 })
             }
         }

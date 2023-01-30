@@ -7,7 +7,35 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model transaction {
+model btcTransaction {
+    id          String  @unique //ID is txid
+    txHash      String?
+    amount      String?
+    blockHash   String?
+    blockNumber String?
+    gas         String?
+    timeStamp   String?
+    input       input[]
+    output      output[]
+}
+
+model input {
+    id        String  @unique
+    publicKey String?
+    amount    String?
+    txId      String?
+    btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model output {
+    id        String  @unique
+    publicKey String?
+    amount    String?
+    txId      String?
+    btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ethTransaction {
     id                String  @unique //ID is txHash
     from              String?
     to                String?
@@ -20,16 +48,15 @@ model transaction {
     feePerGas         String?
     priorityFeeperGas String?
     timeStamp         String? //block timestamp
-    chain             String?
     type              String?
-    fromWallet        wallet? @relation(fields: [from], references: [id], name: "fromwallet", onDelete: NoAction, onUpdate: NoAction)
-    toWallet          wallet? @relation(fields: [to], references: [id], name: "towallet", onDelete: NoAction, onUpdate: NoAction)
+    fromWallet        evmWallet? @relation(fields: [from], references: [id], name: "fromwallet", onDelete: NoAction, onUpdate: NoAction)
+    toWallet          evmWallet? @relation(fields: [to], references: [id], name: "towallet", onDelete: NoAction, onUpdate: NoAction)
 }
 
-model wallet {
-    id              String @unique //ID is public key
-    balance         String?
-    nonce           String?
-    transactionFrom transaction[] @relation(name: "fromwallet")
-    transactionTo   transaction[] @relation(name: "towallet")
+model evmWallet {
+    id                 String           @unique //ID is public key
+    balance            String?
+    nonce              String?
+    transactionFromEth ethTransaction[] @relation(name: "fromwallet")
+    transactionToEth   ethTransaction[] @relation(name: "towallet")
 }
