@@ -55,7 +55,29 @@ export class btcQueries {
             method: 'getrawtransaction',
             params: [txHash, true, blockHash]
           }
-          let getrawTX = await axios.post(this.rpc, rawTXPayload, {headers: this.headers})
-          return getrawTX.data.result
+        let getrawTX = await axios.post(this.rpc, rawTXPayload, { headers: this.headers })
+        return getrawTX.data.result
+    }
+
+    async getDecodedTX(rawTXHexString) {
+        const getDecodedTXPayload = {
+            jsonrpc: '1.0',
+            id: 'curltext',
+            method: 'decoderawtransaction',
+            params: [rawTXHexString]
+        }
+        let decodedTX = await axios.post(this.rpc, getDecodedTXPayload, { headers: this.headers })
+        return decodedTX.data.result
+    }
+
+    async getTransactionFromTxId(txid) {
+        const txPayload = {
+            jsonrpc: '1.0',
+            id: 'curltext',
+            method: 'getrawtransaction',
+            params: [txid]
+        }
+        let transaction = await axios.post(this.rpc, txPayload, { headers: this.headers })
+        return transaction.data.result
     }
 }
