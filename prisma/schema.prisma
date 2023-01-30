@@ -7,8 +7,16 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model btcWallet {
+    id      String   @unique //ID is public key
+    balance String?
+    nonce   String?
+    input   input[]
+    output  output[]
+}
+
 model btcTransaction {
-    id          String  @unique //ID is txid
+    id          String   @unique //ID is txid
     txHash      String?
     amount      String?
     blockHash   String?
@@ -20,23 +28,25 @@ model btcTransaction {
 }
 
 model input {
-    id        String  @unique
+    id        String          @unique
     publicKey String?
     amount    String?
     txId      String?
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    wallet    btcWallet?      @relation(fields: [publicKey], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model output {
-    id        String  @unique
+    id        String          @unique
     publicKey String?
     amount    String?
     txId      String?
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    wallet    btcWallet?      @relation(fields: [publicKey], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model ethTransaction {
-    id                String  @unique //ID is txHash
+    id                String     @unique //ID is txHash
     from              String?
     to                String?
     amount            String?

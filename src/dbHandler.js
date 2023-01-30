@@ -8,6 +8,77 @@ export class DBHandler {
         this.prisma = new PrismaClient()
     }
 
+    async fillBtcWallet(senders, receivers) {
+        for (let i = 0; i < receivers.length; i++) {
+            const receiver = receivers[i]
+
+            const results = await this.prisma.btcWallet.findMany({
+                where: {
+                    id: receiver.address.toLowerCase()
+                },
+                take: 1
+            })
+
+            if (results.length == 0) {
+                await this.prisma.btcWallet.create({
+                    data: {
+                        id: receiver.address.toLowerCase(),
+                        balance: receiver.value.toString(),
+                        nonce: "1",
+                    }
+                }).then(async () => {
+                    this.prisma.$disconnect()
+                }).catch(async (e) => {
+                    this.prisma.$disconnect()
+                })
+            } else if (results.length > 0) {
+                for (let r = 0; r < results.length; r++) {
+                    let oldBalance = parseInt(results[r].balance)
+                    let oldNonce = parseInt(results[r].nonce)
+
+                    await this.prisma.btcWallet.create({
+                        data: {
+                            id: receiver.address.toLowerCase(),
+                            balance: (oldBalance + receiver.value).toString(),
+                            nonce: oldNonce,
+                        }
+                    }).then(async () => {
+                        this.prisma.$disconnect()
+                    }).catch(async (e) => {
+                        this.prisma.$disconnect()
+                    })
+                }
+            }
+        }
+
+        for (let i = 0; i < senders.length; i++) {
+            const sender = senders[i]
+            const results = await this.prisma.btcWallet.findMany({
+                where: {
+                    id: sender.address.toLowerCase()
+                },
+                take: 1
+            })
+
+            for (let r = 0; r < results.length; r++) {
+                let oldBalance = parseInt(results[r].balance)
+                let oldNonce = parseInt(results[r].nonce)
+
+                await this.prisma.btcWallet.create({
+                    data: {
+                        id: sender.address.toLowerCase(),
+                        balance: (oldBalance - sender.value).toString(),
+                        nonce: oldNonce++,
+                    }
+                }).then(async () => {
+                    this.prisma.$disconnect()
+                }).catch(async (e) => {
+                    this.prisma.$disconnect()
+                })
+            }
+        }
+    }
+
     async fillPuts(txId, senders, receivers) {
 
         for (let i = 0; i < senders.length; i++) {
@@ -15,8 +86,8 @@ export class DBHandler {
 
             await this.prisma.input.create({
                 data: {
-                    id: md5(`${txId}${sender.address}${sender.index}`),
-                    publicKey: sender.address,
+                    id: md5(`${txId}${sender.address.toLowerCase()}${sender.index}`),
+                    publicKey: sender.address.toLowerCase(),
                     amount: sender.value.toString(),
                     txId: txId
                 }
@@ -32,8 +103,8 @@ export class DBHandler {
 
             await this.prisma.output.create({
                 data: {
-                    id: md5(`${txId}${receiver.address}${receiver.index}`),
-                    publicKey: receiver.address,
+                    id: md5(`${txId}${receiver.address.toLowerCase()}${receiver.index}`),
+                    publicKey: receiver.address.toLowerCase(),
                     amount: receiver.value.toString(),
                     txId: txId
                 }
