@@ -50,7 +50,6 @@ class ShrimpWatch {
         for (let worker of btcWorkers) {
             worker.on('message', async (message) => {
                 if (message.done) {
-                    this.db.endBlockBtc(message.blockNumber)
                     // If at top of chain, wait for next block
                     let latestBlockNumber = await btcQ.getBlockHeight()
                     while (message.blockNumber + numWorkers > latestBlockNumber) {
@@ -89,7 +88,6 @@ class ShrimpWatch {
         for (let worker of ethWorkers) {
             worker.on('message', async (message) => {
                 if (message.done) {
-                    this.db.endBlockEth(message.blockNumber)
                     // If at top of chain, wait for next block
                     let latestBlock = await web3.eth.getBlock('latest')
                     let latestBlockNumber = latestBlock.number

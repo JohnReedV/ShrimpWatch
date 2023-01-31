@@ -44,7 +44,7 @@ class Btc {
                     value: decodedTX.vout[0].value,
                 }) }
         }
-
+        this.db.endBlockBtc(this.blockNumber)
         parentPort.postMessage({ done: true, blockNumber: this.blockNumber })
     }
 

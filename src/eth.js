@@ -32,6 +32,7 @@ class Eth {
                 // erc20 transfer
             }
         }
+        this.db.endBlockEth(this.blockNumber)
         parentPort.postMessage({ done: true, blockNumber:  this.blockNumber})
     }
 
