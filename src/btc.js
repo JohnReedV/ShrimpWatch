@@ -30,15 +30,16 @@ class Btc {
             let rawTX = await this.btcQ.getRawTX(block.tx[i], blockHash)
             let decodedTX = await this.btcQ.getDecodedTX(rawTX.hex)
 
-            if (!decodedTX.vin[0].coinbase) { //coinbase transactions are mints with no sender
+            if (!decodedTX.vin[0].coinbase) {
                 let senders = await this.getSenders(rawTX.hex)
                 let receivers = await this.getReceivers(decodedTX)
 
                 await this.db.fillBtcWallet(senders, receivers)
                 await this.db.fillTransactionBtc(rawTX, senders, receivers, block)
                 this.db.fillPuts(rawTX.txid, senders, receivers)
-            } else { 
-                await this.db.fillCoinbase({
+
+            } else { //coinbase transactions are mints with no sender
+                this.db.fillCoinbase({
                     address: decodedTX.vout[0].scriptPubKey.address,
                     value: decodedTX.vout[0].value,
                 }) }
