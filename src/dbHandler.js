@@ -8,32 +8,37 @@ export class DBHandler {
         this.prisma = new PrismaClient()
     }
 
-    async createShrimpwatch() {
-        await this.prisma.shrimpwatch.create({
-            data: { id: "shrimpwatch" }
-        }).then(async () => {
-            this.prisma.$disconnect()
-        }).catch(async (e) => {
-            this.prisma.$disconnect()
-        })
-    }
-
     async endBlockBtc(blockNumber) {
-        await this.prisma.shrimpwatch.update({
-            where: { id: "shrimpwatch" },
-            data: { lastBlockBtc: blockNumber.toString() }
+
+        const pkg = {
+            id: "shrimpwatch",
+            lastBlockBtc: blockNumber.toString()
+        }
+
+        await this.prisma.shrimpwatch.upsert({
+            where: {id: pkg.id},
+            update: pkg,
+            create: pkg
         }).then(async () => {
             this.prisma.$disconnect()
         }).catch(async (e) => {
             this.prisma.$disconnect()
+            console.log(e)
         })
 
     }
 
     async endBlockEth(blockNumber) {
-        await this.prisma.shrimpwatch.update({
-            where: { id: "shrimpwatch" },
-            data: { lastBlockEth: blockNumber.toString() }
+
+        const pkg = {
+            id: "shrimpwatch",
+            lastBlockEth: blockNumber.toString()
+        }
+
+        await this.prisma.shrimpwatch.upsert({
+            where: {id: pkg.id},
+            update: pkg,
+            create: pkg
         }).then(async () => {
             this.prisma.$disconnect()
         }).catch(async (e) => {
@@ -69,12 +74,16 @@ export class DBHandler {
                     let oldBalance = parseInt(results[r].balance)
                     let oldNonce = parseInt(results[r].nonce)
 
-                    await this.prisma.btcWallet.create({
-                        data: {
-                            id: receiver.address.toLowerCase(),
-                            balance: (oldBalance + receiver.value).toString(),
-                            nonce: oldNonce,
-                        }
+                    const pkg = {
+                        id: receiver.address.toLowerCase(),
+                        balance: (oldBalance + receiver.value).toString(),
+                        nonce: oldNonce,
+                    }
+
+                    await this.prisma.btcWallet.upsert({
+                        where: {id: pkg.id},
+                        update: pkg,
+                        create: pkg
                     }).then(async () => {
                         this.prisma.$disconnect()
                     }).catch(async (e) => {
@@ -113,12 +122,16 @@ export class DBHandler {
                     let oldBalance = parseInt(results[r].balance)
                     let oldNonce = parseInt(results[r].nonce)
 
-                    await this.prisma.btcWallet.create({
-                        data: {
-                            id: receiver.address.toLowerCase(),
-                            balance: (oldBalance + receiver.value).toString(),
-                            nonce: oldNonce,
-                        }
+                    const pkg = {
+                        id: receiver.address.toLowerCase(),
+                        balance: (oldBalance + receiver.value).toString(),
+                        nonce: oldNonce,
+                    }
+
+                    await this.prisma.btcWallet.upsert({
+                        where: {id: pkg.id},
+                        update: pkg,
+                        create: pkg
                     }).then(async () => {
                         this.prisma.$disconnect()
                     }).catch(async (e) => {
@@ -141,12 +154,16 @@ export class DBHandler {
                 let oldBalance = parseInt(results[r].balance)
                 let oldNonce = parseInt(results[r].nonce)
 
-                await this.prisma.btcWallet.create({
-                    data: {
-                        id: sender.address.toLowerCase(),
-                        balance: (oldBalance - sender.value).toString(),
-                        nonce: oldNonce++,
-                    }
+                const pkg = {
+                    id: sender.address.toLowerCase(),
+                    balance: (oldBalance - sender.value).toString(),
+                    nonce: oldNonce++,
+                }
+
+                await this.prisma.btcWallet.upsert({
+                    where: {id: pkg.id},
+                    update: pkg,
+                    create: pkg
                 }).then(async () => {
                     this.prisma.$disconnect()
                 }).catch(async (e) => {
@@ -161,13 +178,17 @@ export class DBHandler {
         for (let i = 0; i < senders.length; i++) {
             const sender = senders[i]
 
-            await this.prisma.input.create({
-                data: {
-                    id: md5(`${txId}${sender.address.toLowerCase()}${sender.index}`),
-                    publicKey: sender.address.toLowerCase(),
-                    amount: sender.value.toString(),
-                    txId: txId
-                }
+            const pkg = {
+                id: md5(`${txId}${sender.address.toLowerCase()}${sender.index}`),
+                publicKey: sender.address.toLowerCase(),
+                amount: sender.value.toString(),
+                txId: txId
+            }
+
+            await this.prisma.input.upsert({
+                where: {id: pkg.id},
+                update: pkg,
+                create: pkg
             }).then(async () => {
                 this.prisma.$disconnect()
             }).catch(async (e) => {
@@ -178,13 +199,17 @@ export class DBHandler {
         for (let i = 0; i < receivers.length; i++) {
             const receiver = receivers[i]
 
-            await this.prisma.output.create({
-                data: {
-                    id: md5(`${txId}${receiver.address.toLowerCase()}${receiver.index}`),
-                    publicKey: receiver.address.toLowerCase(),
-                    amount: receiver.value.toString(),
-                    txId: txId
-                }
+            const pkg = {
+                id: md5(`${txId}${receiver.address.toLowerCase()}${receiver.index}`),
+                publicKey: receiver.address.toLowerCase(),
+                amount: receiver.value.toString(),
+                txId: txId
+            }
+
+            await this.prisma.output.upsert({
+                where: {id: pkg.id},
+                update: pkg,
+                create: pkg
             }).then(async () => {
                 this.prisma.$disconnect()
             }).catch(async (e) => {
@@ -199,16 +224,20 @@ export class DBHandler {
         for (let i = 0; i < senders.length; i++) { amountSent = amountSent + senders[i].value }
         for (let i = 0; i < receivers.length; i++) { amountReceived = amountReceived + receivers[i].value }
 
-        await this.prisma.btcTransaction.create({
-            data: {
-                id: transaction.txid,
-                txHash: transaction.hash,
-                amount: amountReceived.toString(),
-                blockHash: block.hash,
-                blockNumber: block.height.toString(),
-                gas: (amountSent - amountReceived).toString(),
-                timeStamp: block.time.toString()
-            }
+        const pkg = {
+            id: transaction.txid,
+            txHash: transaction.hash,
+            amount: amountReceived.toString(),
+            blockHash: block.hash,
+            blockNumber: block.height.toString(),
+            gas: (amountSent - amountReceived).toString(),
+            timeStamp: block.time.toString()
+        }
+
+        await this.prisma.btcTransaction.upsert({
+            where: {id: pkg.id},
+            update: pkg,
+            create: pkg
         }).then(async () => {
             this.prisma.$disconnect()
         }).catch(async (e) => {
@@ -218,22 +247,26 @@ export class DBHandler {
 
     async fillTransactionEth(transaction, block, type) {
 
-        await this.prisma.ethTransaction.create({
-            data: {
-                id: transaction.hash,
-                from: transaction.from.toLowerCase(),
-                to: transaction.to.toLowerCase(),
-                amount: transaction.value.toString(),
-                blockHash: transaction.blockHash,
-                blockNumber: transaction.blockNumber.toString(),
-                baseFeePerGas: block.baseFeePerGas.toString(),
-                gasUsed: transaction.gas.toString(),
-                gasPrice: transaction.gasPrice,
-                feePerGas: transaction.maxFeePerGas,
-                priorityFeeperGas: transaction.maxPriorityFeePerGas,
-                timeStamp: block.timestamp.toString(),
-                type: type
-            }
+        const pkg = {
+            id: transaction.hash,
+            from: transaction.from.toLowerCase(),
+            to: transaction.to.toLowerCase(),
+            amount: transaction.value.toString(),
+            blockHash: transaction.blockHash,
+            blockNumber: transaction.blockNumber.toString(),
+            baseFeePerGas: block.baseFeePerGas.toString(),
+            gasUsed: transaction.gas.toString(),
+            gasPrice: transaction.gasPrice,
+            feePerGas: transaction.maxFeePerGas,
+            priorityFeeperGas: transaction.maxPriorityFeePerGas,
+            timeStamp: block.timestamp.toString(),
+            type: type
+        }
+
+        await this.prisma.ethTransaction.upsert({
+            where: {id: pkg.id},
+            update: pkg,
+            create: pkg
         }).then(async () => {
             this.prisma.$disconnect()
         }).catch(async (e) => {
@@ -247,12 +280,16 @@ export class DBHandler {
             const nonceFrom = await web3.eth.getTransactionCount(transaction.from, 'latest')
             const blanceFrom = await web3.eth.getBalance(transaction.from)
 
-            await this.prisma.evmWallet.create({
-                data: {
-                    id: transaction.from.toLowerCase(),
-                    balance: blanceFrom.toString(),
-                    nonce: nonceFrom.toString()
-                }
+            const pkgFrom = {
+                id: transaction.from.toLowerCase(),
+                balance: blanceFrom.toString(),
+                nonce: nonceFrom.toString()
+            }
+
+            await this.prisma.evmWallet.upsert({
+                where: {id: pkgFrom.id},
+                update: pkgFrom,
+                create: pkgFrom
             }).then(async () => {
                 this.prisma.$disconnect()
             }).catch(async (e) => {
@@ -263,12 +300,16 @@ export class DBHandler {
             const nonceTo = await web3.eth.getTransactionCount(transaction.to, 'latest')
             const blanceTo = await web3.eth.getBalance(transaction.to)
 
-            await this.prisma.evmWallet.create({
-                data: {
-                    id: transaction.to.toLowerCase(),
-                    balance: blanceTo.toString(),
-                    nonce: nonceTo.toString()
-                }
+            const pkgTo = {
+                id: transaction.to.toLowerCase(),
+                balance: blanceTo.toString(),
+                nonce: nonceTo.toString()
+            }
+
+            await this.prisma.evmWallet.upsert({
+                where: {id: pkgTo.id},
+                update: pkgTo,
+                create: pkgTo
             }).then(async () => {
                 this.prisma.$disconnect()
             }).catch(async (e) => {
@@ -281,24 +322,32 @@ export class DBHandler {
             const nonceFrom = await web3.eth.getTransactionCount(transaction.from, 'latest')
             const blanceFrom = await web3.eth.getBalance(transaction.from)
 
-            await this.prisma.evmWallet.create({
-                data: {
-                    id: transaction.to.toLowerCase(),
-                    balance: blanceTo.toString(),
-                    nonce: nonceTo.toString()
-                }
+            const pkgFrom = {
+                id: transaction.from.toLowerCase(),
+                balance: blanceFrom.toString(),
+                nonce: nonceFrom.toString()
+            }
+
+            const pkgTo = {
+                id: transaction.to.toLowerCase(),
+                balance: blanceTo.toString(),
+                nonce: nonceTo.toString()
+            }
+
+            await this.prisma.evmWallet.upsert({
+                where: {id: pkgTo.id},
+                update: pkgTo,
+                create: pkgTo
             }).then(async () => {
                 this.prisma.$disconnect()
             }).catch(async (e) => {
                 this.prisma.$disconnect()
             })
 
-            await this.prisma.evmWallet.create({
-                data: {
-                    id: transaction.from.toLowerCase(),
-                    balance: blanceFrom.toString(),
-                    nonce: nonceFrom.toString()
-                }
+            await this.prisma.evmWallet.upsert({
+                where: {id: pkgFrom.id},
+                update: pkgFrom,
+                create: pkgFrom
             }).then(async () => {
                 this.prisma.$disconnect()
             }).catch(async (e) => {

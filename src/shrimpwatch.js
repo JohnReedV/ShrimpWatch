@@ -2,18 +2,14 @@ import { Worker } from 'worker_threads'
 import * as fs from 'fs'
 import Web3 from 'web3'
 import { btcQueries } from './btcQueries.js'
-import { DBHandler } from './dbHandler.js'
 
 class ShrimpWatch {
-    db
     conf
 
     async start() {
-        this.db = new DBHandler()
         this.conf = JSON.parse(fs.readFileSync('./conf.json', 'utf8'))
         let numWorkers = Math.round(this.conf.workerPoolSize)
 
-        await this.db.createShrimpwatch()
         if (this.conf.btcOn && this.conf.ethOn) {
             if (numWorkers % 2 !== 0) {
                 numWorkers = (numWorkers - 1) / 2
