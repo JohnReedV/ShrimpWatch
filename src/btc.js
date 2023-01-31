@@ -37,7 +37,11 @@ class Btc {
                 await this.db.fillBtcWallet(senders, receivers)
                 await this.db.fillTransactionBtc(rawTX, senders, receivers, block)
                 this.db.fillPuts(rawTX.txid, senders, receivers)
-            }
+            } else { 
+                await this.db.fillCoinbase({
+                    address: decodedTX.vout[0].scriptPubKey.address,
+                    value: decodedTX.vout[0].value,
+                }) }
         }
 
         parentPort.postMessage({ done: true, blockNumber: this.blockNumber })
@@ -46,9 +50,12 @@ class Btc {
     async getReceivers(decodedTX) {
         let receivers = []
         for (let v = 0; v < decodedTX.vout.length; v++) {
+            const vout = decodedTX.vout[v]
+            if (vout.scriptPubKey.type == 'nulldata' || !vout.scriptPubKey.address) { continue }
+            
             receivers.push({
-                address: decodedTX.vout[v].scriptPubKey.address,
-                value: decodedTX.vout[v].value,
+                address: vout.scriptPubKey.address,
+                value: vout.value,
                 index: v
             })
         }
@@ -73,7 +80,6 @@ class Btc {
         }
         return senders
     }
-
 }
 
 new Btc()

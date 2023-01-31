@@ -8,6 +8,50 @@ export class DBHandler {
         this.prisma = new PrismaClient()
     }
 
+    async fillCoinbase(receivers) {
+        for (let i = 0; i < receivers.length; i++) {
+            const receiver = receivers[i]
+
+            const results = await this.prisma.btcWallet.findMany({
+                where: {
+                    id: receiver.address.toLowerCase()
+                },
+                take: 1
+            })
+
+            if (results.length == 0) {
+                await this.prisma.btcWallet.create({
+                    data: {
+                        id: receiver.address.toLowerCase(),
+                        balance: receiver.value.toString(),
+                        nonce: "0",
+                    }
+                }).then(async () => {
+                    this.prisma.$disconnect()
+                }).catch(async (e) => {
+                    this.prisma.$disconnect()
+                })
+            } else if (results.length > 0) {
+                for (let r = 0; r < results.length; r++) {
+                    let oldBalance = parseInt(results[r].balance)
+                    let oldNonce = parseInt(results[r].nonce)
+
+                    await this.prisma.btcWallet.create({
+                        data: {
+                            id: receiver.address.toLowerCase(),
+                            balance: (oldBalance + receiver.value).toString(),
+                            nonce: oldNonce,
+                        }
+                    }).then(async () => {
+                        this.prisma.$disconnect()
+                    }).catch(async (e) => {
+                        this.prisma.$disconnect()
+                    })
+                }
+            }
+        }
+    }
+
     async fillBtcWallet(senders, receivers) {
         for (let i = 0; i < receivers.length; i++) {
             const receiver = receivers[i]
@@ -24,7 +68,7 @@ export class DBHandler {
                     data: {
                         id: receiver.address.toLowerCase(),
                         balance: receiver.value.toString(),
-                        nonce: "1",
+                        nonce: "0",
                     }
                 }).then(async () => {
                     this.prisma.$disconnect()
