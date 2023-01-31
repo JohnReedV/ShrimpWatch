@@ -8,6 +8,29 @@ export class DBHandler {
         this.prisma = new PrismaClient()
     }
 
+    async endBlockBtc(blockNumber) {
+        await this.prisma.shrimpwatch.update({
+            where: { id: "shrimpwatch" },
+            data: { lastBlockBtc: blockNumber.toString() }
+        }).then(async () => {
+            this.prisma.$disconnect()
+        }).catch(async (e) => {
+            this.prisma.$disconnect()
+        })
+
+    }
+
+    async endBlockEth(blockNumber) {
+        await this.prisma.shrimpwatch.update({
+            where: { id: "shrimpwatch" },
+            data: { lastBlockEth: blockNumber.toString() }
+        }).then(async () => {
+            this.prisma.$disconnect()
+        }).catch(async (e) => {
+            this.prisma.$disconnect()
+        })
+    }
+
     async fillCoinbase(receivers) {
         for (let i = 0; i < receivers.length; i++) {
             const receiver = receivers[i]

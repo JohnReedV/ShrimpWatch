@@ -70,3 +70,9 @@ model evmWallet {
     transactionFromEth ethTransaction[] @relation(name: "fromwallet")
     transactionToEth   ethTransaction[] @relation(name: "towallet")
 }
+
+model shrimpwatch {
+    id           String  @unique
+    lastBlockEth String?
+    lastBlockBtc String?
+}
