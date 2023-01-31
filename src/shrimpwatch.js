@@ -13,6 +13,7 @@ class ShrimpWatch {
         this.conf = JSON.parse(fs.readFileSync('./conf.json', 'utf8'))
         let numWorkers = Math.round(this.conf.workerPoolSize)
 
+        await this.db.createShrimpwatch()
         if (this.conf.btcOn && this.conf.ethOn) {
             if (numWorkers % 2 !== 0) {
                 numWorkers = (numWorkers - 1) / 2

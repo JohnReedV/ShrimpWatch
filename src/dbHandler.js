@@ -8,6 +8,16 @@ export class DBHandler {
         this.prisma = new PrismaClient()
     }
 
+    async createShrimpwatch() {
+        await this.prisma.shrimpwatch.create({
+            data: { id: "shrimpwatch" }
+        }).then(async () => {
+            this.prisma.$disconnect()
+        }).catch(async (e) => {
+            this.prisma.$disconnect()
+        })
+    }
+
     async endBlockBtc(blockNumber) {
         await this.prisma.shrimpwatch.update({
             where: { id: "shrimpwatch" },
