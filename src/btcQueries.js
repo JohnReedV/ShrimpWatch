@@ -75,7 +75,7 @@ export class btcQueries {
             jsonrpc: '1.0',
             id: 'curltext',
             method: 'getrawtransaction',
-            params: [txid]
+            params: [txid, true]
         }
         let transaction = await axios.post(this.rpc, txPayload, { headers: this.headers })
         return transaction.data.result

@@ -69,7 +69,7 @@ class Btc {
         for (let i = 0; i < transaction.inputs.length; i++) {
             const input = transaction.inputs[i]
             let oldTransaction = await this.btcQ.getTransactionFromTxId(input.prevTxId.toString('hex'))
-            let decodedTX = await this.btcQ.getDecodedTX(oldTransaction)
+            let decodedTX = await this.btcQ.getDecodedTX(oldTransaction.hex)
             let spk = decodedTX.vout[input.outputIndex].scriptPubKey
             if (spk.address) {
                 senders.push({
