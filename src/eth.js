@@ -20,9 +20,9 @@ class Eth {
 
             this.starteth().then(async () => {
                 await this.db.endBlockEth(this.blockNumber)
-                parentPort.postMessage({ done: true, blockNumber:  this.blockNumber})
+                parentPort.postMessage({ done: true, blockNumber: this.blockNumber })
             }).catch((e) => {
-                console.log(`Error on ETH block: ${this.blockNumber} Message: ${e} :end message` )
+                console.log(`Error on ETH block: ${this.blockNumber} Message: ${e} :end message`)
                 parentPort.postMessage({ done: false, blockNumber: this.blockNumber })
             })
         })
@@ -34,31 +34,27 @@ class Eth {
             let transaction = await this.web3.eth.getTransaction(currentBlock.transactions[i])
             if (transaction.input === '0x' && transaction.value > 0) {
                 //regular eth transfer
-                await this.handleTransfer(transaction, currentBlock, this.web3)
+                if (await this.isContract(transaction.to)) {
+                    //transfer to contract
+                    await this.db.fillWalletEth(transaction, this.web3, "toContract")
+                    await this.db.fillTransactionEth(transaction, currentBlock, "toContract")
+                } else if (await this.isContract(transaction.from)) {
+                    //transfer from contract
+                    await this.db.fillWalletEth(transaction, this.web3, "fromContract")
+                    await this.db.fillTransactionEth(transaction, currentBlock, "fromContract")
+                } else {
+                    // regular transfer
+                    await this.db.fillWalletEth(transaction, this.web3, "regular")
+                    await this.db.fillTransactionEth(transaction, currentBlock, "regular")
+                }
             } else if (transaction.input.startsWith('0xa9059cbb')) {
                 // erc20 transfer
             }
         }
     }
 
-    async handleTransfer(transaction, block, web3) {
-        if (await this.isContract(transaction.to, web3)) {
-            //transfer to contract
-            await this.db.fillWalletEth(transaction, web3, "toContract")
-            await this.db.fillTransactionEth(transaction, block, "toContract")
-        } else if (await this.isContract(transaction.from, web3)) {
-            //transfer from contract
-            await this.db.fillWalletEth(transaction, web3, "fromContract")
-            await this.db.fillTransactionEth(transaction, block, "fromContract")
-        } else {
-            // regular transfer
-            await this.db.fillWalletEth(transaction, web3, "regular")
-            await this.db.fillTransactionEth(transaction, block, "regular")
-        }
-    }
-
-    async isContract(address, web3) {
-        const code = await web3.eth.getCode(address)
+    async isContract(address) {
+        const code = await this.web3.eth.getCode(address)
         if (code.length > 2) { return true } else return false
     }
 }
