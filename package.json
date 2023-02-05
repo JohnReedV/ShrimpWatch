@@ -5,8 +5,10 @@
   "description": "",
   "main": "src/shrimpwatch.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/shrimpwatch.js"
+    "start": "node src/shrimpwatch.js",
+    "prisma": "npx prisma generate && npx prisma migrate dev --name public",
+    "dbinit": "sudo docker build ./ && sudo docker run --name ShrimpWatch -p 5432:5432 b0c745be67f9",
+    "dbstart": "sudo docker start ShrimpWatch && sudo docker logs ShrimpWatch"
   },
   "repository": {
     "type": "git",

@@ -6,8 +6,14 @@ ShrimpWatch is a powerful platform that provides insightful analysis of Bitcoin 
 
 ### Setup
 
-genrate db schema with `npx prisma generate`
+First step is to set up your postgres db. If you do not already have one a Dockerfile has been provided in the project root.
 
-migrate schema with `npx prisma migrate dev --name public`
+Using provided Dockerfile: `docker build ./ && docker run --name ShrimpWatch -p 5432:5432 <image>`
 
-start with `yarn start`
+Connect to your postgres database in ./prisma
+
+Genrate and push db schema with `yarn prisma`
+
+Setup your configuration file. See ./conf.json.example
+
+Run ShrimpWatch with `yarn start`
