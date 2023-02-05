@@ -76,3 +76,8 @@ model shrimpwatch {
     lastBlockEth String?
     lastBlockBtc String?
 }
+
+// for resetting local db
+// model reset {
+//     id  String @unique
+// }

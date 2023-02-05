@@ -39,10 +39,10 @@ class Btc {
                 this.db.fillPuts(rawTX.txid, senders, receivers)
 
             } else { //coinbase transactions are mints with no sender
-                this.db.fillCoinbase({
+                this.db.fillCoinbase([{
                     address: decodedTX.vout[0].scriptPubKey.address,
                     value: decodedTX.vout[0].value,
-                }) }
+                }]) }
         }
         this.db.endBlockBtc(this.blockNumber)
         parentPort.postMessage({ done: true, blockNumber: this.blockNumber })
