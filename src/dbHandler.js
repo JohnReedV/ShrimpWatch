@@ -150,11 +150,12 @@ export class DBHandler {
 
             for (let r = 0; r < results.length; r++) {
                 let oldBalance = parseInt(results[r].balance)
-
+                let oldNonce = results[r].nonce
+                
                 const pkg = {
                     id: sender.address.toLowerCase(),
                     balance: (oldBalance - sender.value).toString(),
-                    nonce: (parseInt(results[r].nonce)++).toString(),
+                    nonce: (oldNonce++).toString(),
                 }
 
                 await this.prisma.btcWallet.upsert({
