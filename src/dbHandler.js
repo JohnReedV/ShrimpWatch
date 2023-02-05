@@ -16,16 +16,10 @@ export class DBHandler {
         }
 
         await this.prisma.shrimpwatch.upsert({
-            where: {id: pkg.id},
+            where: { id: pkg.id },
             update: pkg,
             create: pkg
-        }).then(async () => {
-            this.prisma.$disconnect()
-        }).catch(async (e) => {
-            this.prisma.$disconnect()
-            console.log(e)
-        })
-
+        }).catch((e) => { })
     }
 
     async endBlockEth(blockNumber) {
@@ -36,14 +30,10 @@ export class DBHandler {
         }
 
         await this.prisma.shrimpwatch.upsert({
-            where: {id: pkg.id},
+            where: { id: pkg.id },
             update: pkg,
             create: pkg
-        }).then(async () => {
-            this.prisma.$disconnect()
-        }).catch(async (e) => {
-            this.prisma.$disconnect()
-        })
+        }).catch((e) => { })
     }
 
     async fillCoinbase(receivers) {
@@ -64,11 +54,8 @@ export class DBHandler {
                         balance: receiver.value.toString(),
                         nonce: "0",
                     }
-                }).then(async () => {
-                    this.prisma.$disconnect()
-                }).catch(async (e) => {
-                    this.prisma.$disconnect()
-                })
+                }).catch((e) => { })
+
             } else if (results.length > 0) {
                 for (let r = 0; r < results.length; r++) {
                     let oldBalance = parseInt(results[r].balance)
@@ -80,14 +67,10 @@ export class DBHandler {
                     }
 
                     await this.prisma.btcWallet.upsert({
-                        where: {id: pkg.id},
+                        where: { id: pkg.id },
                         update: pkg,
                         create: pkg
-                    }).then(async () => {
-                        this.prisma.$disconnect()
-                    }).catch(async (e) => {
-                        this.prisma.$disconnect()
-                    })
+                    }).catch((e) => { })
                 }
             }
         }
@@ -104,6 +87,7 @@ export class DBHandler {
                 take: 1
             })
 
+            if (typeof results.length === undefined) { return }
             if (results.length == 0) {
                 await this.prisma.btcWallet.create({
                     data: {
@@ -111,11 +95,8 @@ export class DBHandler {
                         balance: receiver.value.toString(),
                         nonce: "0",
                     }
-                }).then(async () => {
-                    this.prisma.$disconnect()
-                }).catch(async (e) => {
-                    this.prisma.$disconnect()
-                })
+                }).catch((e) => { })
+
             } else if (results.length > 0) {
                 for (let r = 0; r < results.length; r++) {
                     let oldBalance = parseInt(results[r].balance)
@@ -127,14 +108,10 @@ export class DBHandler {
                     }
 
                     await this.prisma.btcWallet.upsert({
-                        where: {id: pkg.id},
+                        where: { id: pkg.id },
                         update: pkg,
                         create: pkg
-                    }).then(async () => {
-                        this.prisma.$disconnect()
-                    }).catch(async (e) => {
-                        this.prisma.$disconnect()
-                    })
+                    }).catch((e) => { })
                 }
             }
         }
@@ -151,7 +128,7 @@ export class DBHandler {
             for (let r = 0; r < results.length; r++) {
                 let oldBalance = parseInt(results[r].balance)
                 let oldNonce = results[r].nonce
-                
+
                 const pkg = {
                     id: sender.address.toLowerCase(),
                     balance: (oldBalance - sender.value).toString(),
@@ -159,14 +136,10 @@ export class DBHandler {
                 }
 
                 await this.prisma.btcWallet.upsert({
-                    where: {id: pkg.id},
+                    where: { id: pkg.id },
                     update: pkg,
                     create: pkg
-                }).then(async () => {
-                    this.prisma.$disconnect()
-                }).catch(async (e) => {
-                    this.prisma.$disconnect()
-                })
+                }).catch((e) => { })
             }
         }
     }
@@ -184,14 +157,10 @@ export class DBHandler {
             }
 
             await this.prisma.input.upsert({
-                where: {id: pkg.id},
+                where: { id: pkg.id },
                 update: pkg,
                 create: pkg
-            }).then(async () => {
-                this.prisma.$disconnect()
-            }).catch(async (e) => {
-                this.prisma.$disconnect()
-            })
+            }).catch((e) => { })
         }
 
         for (let i = 0; i < receivers.length; i++) {
@@ -205,14 +174,10 @@ export class DBHandler {
             }
 
             await this.prisma.output.upsert({
-                where: {id: pkg.id},
+                where: { id: pkg.id },
                 update: pkg,
                 create: pkg
-            }).then(async () => {
-                this.prisma.$disconnect()
-            }).catch(async (e) => {
-                this.prisma.$disconnect()
-            })
+            }).catch((e) => { })
         }
     }
 
@@ -233,14 +198,10 @@ export class DBHandler {
         }
 
         await this.prisma.btcTransaction.upsert({
-            where: {id: pkg.id},
+            where: { id: pkg.id },
             update: pkg,
             create: pkg
-        }).then(async () => {
-            this.prisma.$disconnect()
-        }).catch(async (e) => {
-            this.prisma.$disconnect()
-        })
+        }).catch((e) => { })
     }
 
     async fillTransactionEth(transaction, block, type) {
@@ -262,14 +223,10 @@ export class DBHandler {
         }
 
         await this.prisma.ethTransaction.upsert({
-            where: {id: pkg.id},
+            where: { id: pkg.id },
             update: pkg,
             create: pkg
-        }).then(async () => {
-            this.prisma.$disconnect()
-        }).catch(async (e) => {
-            this.prisma.$disconnect()
-        })
+        }).catch((e) => { })
     }
 
     async fillWalletEth(transaction, web3, type) {
@@ -285,14 +242,10 @@ export class DBHandler {
             }
 
             await this.prisma.evmWallet.upsert({
-                where: {id: pkgFrom.id},
+                where: { id: pkgFrom.id },
                 update: pkgFrom,
                 create: pkgFrom
-            }).then(async () => {
-                this.prisma.$disconnect()
-            }).catch(async (e) => {
-                this.prisma.$disconnect()
-            })
+            }).catch((e) => { })
 
         } else if (type == "fromContract") {
             const nonceTo = await web3.eth.getTransactionCount(transaction.to, 'latest')
@@ -305,14 +258,10 @@ export class DBHandler {
             }
 
             await this.prisma.evmWallet.upsert({
-                where: {id: pkgTo.id},
+                where: { id: pkgTo.id },
                 update: pkgTo,
                 create: pkgTo
-            }).then(async () => {
-                this.prisma.$disconnect()
-            }).catch(async (e) => {
-                this.prisma.$disconnect()
-            })
+            }).catch((e) => { })
 
         } else if (type == "regular") {
             const nonceTo = await web3.eth.getTransactionCount(transaction.to, 'latest')
@@ -333,24 +282,16 @@ export class DBHandler {
             }
 
             await this.prisma.evmWallet.upsert({
-                where: {id: pkgTo.id},
+                where: { id: pkgTo.id },
                 update: pkgTo,
                 create: pkgTo
-            }).then(async () => {
-                this.prisma.$disconnect()
-            }).catch(async (e) => {
-                this.prisma.$disconnect()
-            })
+            }).catch((e) => { })
 
             await this.prisma.evmWallet.upsert({
-                where: {id: pkgFrom.id},
+                where: { id: pkgFrom.id },
                 update: pkgFrom,
                 create: pkgFrom
-            }).then(async () => {
-                this.prisma.$disconnect()
-            }).catch(async (e) => {
-                this.prisma.$disconnect()
-            })
+            }).catch((e) => { })
         }
     }
 }

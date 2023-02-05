@@ -15,10 +15,17 @@ class Btc {
         this.db = new DBHandler()
         this.conf = JSON.parse(fs.readFileSync('./conf.json', 'utf8'))
 
-        parentPort.on('message', (message) => {
+        parentPort.on('message', async (message) => {
             this.blockNumber = message.blockNumber
             console.log("Working on BTC block : " + this.blockNumber)
-            this.startBtc()
+
+            this.startBtc().then(async () => {
+                await this.db.endBlockBtc(this.blockNumber)
+                parentPort.postMessage({ done: true, blockNumber: this.blockNumber })
+            }).catch((e) => {
+                console.log(`Error on BTC block: ${this.blockNumber} Message: ${e} :end message` )
+                parentPort.postMessage({ done: false, blockNumber: this.blockNumber })
+            })
         })
     }
 
@@ -36,7 +43,7 @@ class Btc {
 
                 await this.db.fillBtcWallet(senders, receivers)
                 await this.db.fillTransactionBtc(rawTX, senders, receivers, block)
-                this.db.fillPuts(rawTX.txid, senders, receivers)
+                await this.db.fillPuts(rawTX.txid, senders, receivers)
 
             } else { //coinbase transactions are mints with no sender
                 this.db.fillCoinbase([{
@@ -44,8 +51,6 @@ class Btc {
                     value: decodedTX.vout[0].value,
                 }]) }
         }
-        this.db.endBlockBtc(this.blockNumber)
-        parentPort.postMessage({ done: true, blockNumber: this.blockNumber })
     }
 
     async getReceivers(decodedTX) {

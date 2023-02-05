@@ -58,6 +58,9 @@ class ShrimpWatch {
                     }
                     btcCompletedBlocks.add(blockNumber)
                     worker.postMessage({ blockNumber })
+                } else if (!message.done) {
+                    let blockNumber = message.blockNumber
+                    worker.postMessage({ blockNumber })
                 }
             })
         }
@@ -97,6 +100,9 @@ class ShrimpWatch {
                         blockNumber++
                     }
                     ethCompletedBlocks.add(blockNumber)
+                    worker.postMessage({ blockNumber })
+                } else if (!message.done) {
+                    let blockNumber = message.blockNumber
                     worker.postMessage({ blockNumber })
                 }
             })
