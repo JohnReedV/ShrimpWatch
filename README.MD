@@ -12,8 +12,8 @@ Using provided Dockerfile: `docker build ./ && docker run --name ShrimpWatch -p 
 
 Connect to your postgres database in ./prisma
 
-Genrate and push db schema with `yarn prisma`
+Generate and push db schema with `yarn prisma`
 
-Setup your configuration file. See ./conf.json.example
+Set up your configuration file @ ./conf.json.example
 
 Run ShrimpWatch with `yarn start`
