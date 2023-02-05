@@ -14,12 +14,6 @@ class Eth {
         this.web3 = new Web3(new Web3.providers.HttpProvider(this.conf.ethHttpProvider))
         this.db = new DBHandler()
 
-        parentPort.on('message', (message) => {
-            this.blockNumber = message.blockNumber
-            console.log("Working on ETH block : " + this.blockNumber)
-            this.starteth()
-        })
-
         parentPort.on('message', async (message) => {
             this.blockNumber = message.blockNumber
             console.log("Working on ETH block : " + this.blockNumber)
