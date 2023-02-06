@@ -36,39 +36,43 @@ export class DBHandler {
         }).catch((e) => { })
     }
 
-    async fillCoinbase(receiver) {
+    async fillCoinbase(receivers) {
 
-        const results = await this.prisma.btcWallet.findMany({
-            where: {
-                id: receiver.address.toLowerCase()
-            },
-            take: 1
-        })
+        for (let i = 0; i < receivers.length; i++) {
+            const receiver = receivers[i]
 
-        if (results.length == 0) {
-            await this.prisma.btcWallet.create({
-                data: {
-                    id: receiver.address.toLowerCase(),
-                    balance: receiver.value.toString(),
-                    nonce: "0",
-                }
-            }).catch((e) => { })
+            const results = await this.prisma.btcWallet.findMany({
+                where: {
+                    id: receiver.address.toLowerCase()
+                },
+                take: 1
+            })
 
-        } else if (results.length > 0) {
-            for (let r = 0; r < results.length; r++) {
-                let oldBalance = parseInt(results[r].balance)
-
-                const pkg = {
-                    id: receiver.address.toLowerCase(),
-                    balance: (oldBalance + receiver.value).toString(),
-                    nonce: results[r].nonce,
-                }
-
-                await this.prisma.btcWallet.upsert({
-                    where: { id: pkg.id },
-                    update: pkg,
-                    create: pkg
+            if (results.length == 0) {
+                await this.prisma.btcWallet.create({
+                    data: {
+                        id: receiver.address.toLowerCase(),
+                        balance: receiver.value.toString(),
+                        nonce: "0",
+                    }
                 }).catch((e) => { })
+
+            } else if (results.length > 0) {
+                for (let r = 0; r < results.length; r++) {
+                    let oldBalance = parseInt(results[r].balance)
+
+                    const pkg = {
+                        id: receiver.address.toLowerCase(),
+                        balance: (oldBalance + receiver.value).toString(),
+                        nonce: results[r].nonce,
+                    }
+
+                    await this.prisma.btcWallet.upsert({
+                        where: { id: pkg.id },
+                        update: pkg,
+                        create: pkg
+                    }).catch((e) => { })
+                }
             }
         }
 

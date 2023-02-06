@@ -23,7 +23,7 @@ class Btc {
                 await this.db.endBlockBtc(this.blockNumber)
                 parentPort.postMessage({ done: true, blockNumber: this.blockNumber })
             }).catch((e) => {
-                console.log(`Error on BTC block: ${this.blockNumber} Message: ${e} :end message` )
+                console.log(`Error on BTC block: ${this.blockNumber} Message: ${e} :end message`)
                 parentPort.postMessage({ done: false, blockNumber: this.blockNumber })
             })
         })
@@ -37,18 +37,29 @@ class Btc {
             let rawTX = await this.btcQ.getRawTX(block.tx[i], blockHash)
             let decodedTX = await this.btcQ.getDecodedTX(rawTX.hex)
 
-            if (!decodedTX.vin[0].coinbase) {
+            if (decodedTX.vin[0].coinbase) { //coinbase transactions are mints with no sender
+
+                let coinbases = []
+                for (let c = 0; c < decodedTX.vout.length; c++) {
+                    let cbAddress = decodedTX.vout[c].scriptPubKey.address
+                    let cbValue = decodedTX.vout[c].value
+                    if (cbAddress && cbValue) {
+                        coinbases.push({
+                            address: cbAddress,
+                            value: cbValue,
+                        })
+                    }
+                }
+                await this.db.fillCoinbase(coinbases)
+
+            } else {
                 let senders = await this.getSenders(rawTX.hex)
                 let receivers = await this.getReceivers(decodedTX)
 
                 await this.db.fillTransactionBtc(rawTX, senders, receivers, block)
                 await this.db.fillBtcWallet(senders, receivers, rawTX.txid)
 
-            } else { //coinbase transactions are mints with no sender
-                await this.db.fillCoinbase({
-                    address: decodedTX.vout[0].scriptPubKey.address,
-                    value: decodedTX.vout[0].value,
-                }) }
+            }
         }
     }
 
@@ -57,7 +68,7 @@ class Btc {
         for (let v = 0; v < decodedTX.vout.length; v++) {
             const vout = decodedTX.vout[v]
             if (vout.scriptPubKey.type == 'nulldata' || !vout.scriptPubKey.address) { continue }
-            
+
             receivers.push({
                 address: vout.scriptPubKey.address,
                 value: vout.value,
