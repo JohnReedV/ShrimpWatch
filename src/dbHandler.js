@@ -144,7 +144,7 @@ export class DBHandler {
                     balance: (oldBalance - sender.value).toString(),
                     nonce: (oldNonce++).toString(),
                 }
-                //console.log(pkg); console.log(oldBalance); console.log(sender.value); console.log(txId); console.log(results)
+
                 await this.prisma.btcWallet.upsert({
                     where: { id: pkg.id },
                     update: pkg,
