@@ -9,7 +9,8 @@
     "prisma": "npx prisma generate && npx prisma migrate dev --name public",
     "dbinit": "sudo docker build ./ && sudo docker run --name ShrimpWatch -p 5432:5432 b0c745be67f9",
     "dbstart": "sudo docker start ShrimpWatch && sudo docker logs -f ShrimpWatch",
-    "dbstop": "sudo docker stop ShrimpWatch"
+    "dbstop": "sudo docker stop ShrimpWatch",
+    "dbsize": "sudo docker exec ShrimpWatch bash -c 'du -sh /var/lib/postgresql/data/'"
   },
   "repository": {
     "type": "git",
