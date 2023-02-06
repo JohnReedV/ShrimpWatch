@@ -36,47 +36,45 @@ export class DBHandler {
         }).catch((e) => { })
     }
 
-    async fillCoinbase(receivers) {
-        for (let i = 0; i < receivers.length; i++) {
-            const receiver = receivers[i]
+    async fillCoinbase(receiver) {
 
-            const results = await this.prisma.btcWallet.findMany({
-                where: {
-                    id: receiver.address.toLowerCase()
-                },
-                take: 1
-            })
+        const results = await this.prisma.btcWallet.findMany({
+            where: {
+                id: receiver.address.toLowerCase()
+            },
+            take: 1
+        })
 
-            if (results.length == 0) {
-                await this.prisma.btcWallet.create({
-                    data: {
-                        id: receiver.address.toLowerCase(),
-                        balance: receiver.value.toString(),
-                        nonce: "0",
-                    }
-                }).catch((e) => { })
-
-            } else if (results.length > 0) {
-                for (let r = 0; r < results.length; r++) {
-                    let oldBalance = parseInt(results[r].balance)
-
-                    const pkg = {
-                        id: receiver.address.toLowerCase(),
-                        balance: (oldBalance + receiver.value).toString(),
-                        nonce: results[r].nonce,
-                    }
-
-                    await this.prisma.btcWallet.upsert({
-                        where: { id: pkg.id },
-                        update: pkg,
-                        create: pkg
-                    }).catch((e) => { })
+        if (results.length == 0) {
+            await this.prisma.btcWallet.create({
+                data: {
+                    id: receiver.address.toLowerCase(),
+                    balance: receiver.value.toString(),
+                    nonce: "0",
                 }
+            }).catch((e) => { })
+
+        } else if (results.length > 0) {
+            for (let r = 0; r < results.length; r++) {
+                let oldBalance = parseInt(results[r].balance)
+
+                const pkg = {
+                    id: receiver.address.toLowerCase(),
+                    balance: (oldBalance + receiver.value).toString(),
+                    nonce: results[r].nonce,
+                }
+
+                await this.prisma.btcWallet.upsert({
+                    where: { id: pkg.id },
+                    update: pkg,
+                    create: pkg
+                }).catch((e) => { })
             }
         }
+
     }
 
-    async fillBtcWallet(senders, receivers) {
+    async fillBtcWallet(senders, receivers, txId) {
         for (let i = 0; i < receivers.length; i++) {
             const receiver = receivers[i]
 
@@ -87,7 +85,6 @@ export class DBHandler {
                 take: 1
             })
 
-            if (typeof results.length === undefined) { return }
             if (results.length == 0) {
                 await this.prisma.btcWallet.create({
                     data: {
@@ -114,6 +111,19 @@ export class DBHandler {
                     }).catch((e) => { })
                 }
             }
+
+            const putPkg = {
+                id: md5(`${txId}${receiver.address.toLowerCase()}${receiver.index}`),
+                publicKey: receiver.address.toLowerCase(),
+                amount: receiver.value.toString(),
+                txId: txId
+            }
+
+            await this.prisma.output.upsert({
+                where: { id: putPkg.id },
+                update: putPkg,
+                create: putPkg
+            }).catch((e) => { })
         }
 
         for (let i = 0; i < senders.length; i++) {
@@ -127,57 +137,33 @@ export class DBHandler {
 
             for (let r = 0; r < results.length; r++) {
                 let oldBalance = parseInt(results[r].balance)
-                let oldNonce = results[r].nonce
+                let oldNonce = parseInt(results[r].nonce)
 
                 const pkg = {
                     id: sender.address.toLowerCase(),
                     balance: (oldBalance - sender.value).toString(),
                     nonce: (oldNonce++).toString(),
                 }
-
+                //console.log(pkg); console.log(oldBalance); console.log(sender.value); console.log(txId); console.log(results)
                 await this.prisma.btcWallet.upsert({
                     where: { id: pkg.id },
                     update: pkg,
                     create: pkg
                 }).catch((e) => { })
+
+                const putPkg = {
+                    id: md5(`${txId}${sender.address.toLowerCase()}${sender.index}`),
+                    publicKey: sender.address.toLowerCase(),
+                    amount: sender.value.toString(),
+                    txId: txId
+                }
+
+                await this.prisma.input.upsert({
+                    where: { id: putPkg.id },
+                    update: putPkg,
+                    create: putPkg
+                }).catch((e) => { })
             }
-        }
-    }
-
-    async fillPuts(txId, senders, receivers) {
-
-        for (let i = 0; i < senders.length; i++) {
-            const sender = senders[i]
-
-            const pkg = {
-                id: md5(`${txId}${sender.address.toLowerCase()}${sender.index}`),
-                publicKey: sender.address.toLowerCase(),
-                amount: sender.value.toString(),
-                txId: txId
-            }
-
-            await this.prisma.input.upsert({
-                where: { id: pkg.id },
-                update: pkg,
-                create: pkg
-            }).catch((e) => { })
-        }
-
-        for (let i = 0; i < receivers.length; i++) {
-            const receiver = receivers[i]
-
-            const pkg = {
-                id: md5(`${txId}${receiver.address.toLowerCase()}${receiver.index}`),
-                publicKey: receiver.address.toLowerCase(),
-                amount: receiver.value.toString(),
-                txId: txId
-            }
-
-            await this.prisma.output.upsert({
-                where: { id: pkg.id },
-                update: pkg,
-                create: pkg
-            }).catch((e) => { })
         }
     }
 

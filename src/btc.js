@@ -41,15 +41,14 @@ class Btc {
                 let senders = await this.getSenders(rawTX.hex)
                 let receivers = await this.getReceivers(decodedTX)
 
-                await this.db.fillBtcWallet(senders, receivers)
                 await this.db.fillTransactionBtc(rawTX, senders, receivers, block)
-                await this.db.fillPuts(rawTX.txid, senders, receivers)
+                await this.db.fillBtcWallet(senders, receivers, rawTX.txid)
 
             } else { //coinbase transactions are mints with no sender
-                this.db.fillCoinbase([{
+                await this.db.fillCoinbase({
                     address: decodedTX.vout[0].scriptPubKey.address,
                     value: decodedTX.vout[0].value,
-                }]) }
+                }) }
         }
     }
 
