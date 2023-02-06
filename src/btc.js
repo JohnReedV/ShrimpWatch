@@ -51,7 +51,7 @@ class Btc {
                         })
                     }
                 }
-                await this.db.fillCoinbase(coinbases)
+                await this.db.fillCoinbase(coinbases, rawTX, block)
 
             }
             else {

@@ -36,9 +36,11 @@ export class DBHandler {
         }).catch((e) => { })
     }
 
-    async fillCoinbase(receivers) {
+    async fillCoinbase(receivers, transaction, block) {
+        let amountReceived = 0
 
         for (let i = 0; i < receivers.length; i++) {
+            amountReceived = amountReceived + receivers[i].value
             const receiver = receivers[i]
 
             const results = await this.prisma.btcWallet.findMany({
@@ -75,6 +77,22 @@ export class DBHandler {
                 }
             }
         }
+
+        const pkg = {
+            id: transaction.txid,
+            txHash: transaction.hash,
+            amount: amountReceived.toString(),
+            blockHash: block.hash,
+            blockNumber: block.height.toString(),
+            timeStamp: block.time.toString(),
+            types: ["coinbase"]
+        }
+
+        await this.prisma.btcTransaction.upsert({
+            where: { id: pkg.id },
+            update: pkg,
+            create: pkg
+        }).catch((e) => { })
 
     }
 
@@ -185,7 +203,7 @@ export class DBHandler {
             blockNumber: block.height.toString(),
             gas: (amountSent - amountReceived).toString(),
             timeStamp: block.time.toString(),
-            types
+            types: types
         }
 
         await this.prisma.btcTransaction.upsert({
