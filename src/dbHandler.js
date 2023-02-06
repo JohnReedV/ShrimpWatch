@@ -171,7 +171,7 @@ export class DBHandler {
         }
     }
 
-    async fillTransactionBtc(transaction, senders, receivers, block) {
+    async fillTransactionBtc(transaction, senders, receivers, block, types) {
         let amountSent = 0
         let amountReceived = 0
         for (let i = 0; i < senders.length; i++) { amountSent = amountSent + senders[i].value }
@@ -184,7 +184,8 @@ export class DBHandler {
             blockHash: block.hash,
             blockNumber: block.height.toString(),
             gas: (amountSent - amountReceived).toString(),
-            timeStamp: block.time.toString()
+            timeStamp: block.time.toString(),
+            types
         }
 
         await this.prisma.btcTransaction.upsert({

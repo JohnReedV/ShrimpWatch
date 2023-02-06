@@ -23,6 +23,7 @@ model btcTransaction {
     blockNumber String?
     gas         String?
     timeStamp   String?
+    types       String[]
     input       input[]
     output      output[]
 }
