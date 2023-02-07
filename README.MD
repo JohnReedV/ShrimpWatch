@@ -18,3 +18,6 @@ Set up your configuration file @ ./conf.json.example
 Note that on my machine the database will not respond to all queries with > 16 workers due to request overload. 
 
 Run ShrimpWatch with `yarn start`
+
+### licence
+You cannot own information https://unlicense.org/
