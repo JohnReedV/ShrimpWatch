@@ -17,12 +17,13 @@ model btcWallet {
 
 model btcTransaction {
     id          String   @unique //ID is txid
-    txHash      String?
+    txHex       String?
     amount      String?
     blockHash   String?
     blockNumber String?
     gas         String?
     timeStamp   String?
+    coinbase    Boolean?
     input       input[]
     output      output[]
 }

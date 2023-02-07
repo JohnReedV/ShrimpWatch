@@ -42,11 +42,12 @@ export class DBHandler {
 
         const pkg = {
             id: transaction.txid,
-            txHash: transaction.hash,
+            txHex: transaction.hex,
             amount: amountReceived.toString(),
             blockHash: block.hash,
             blockNumber: block.height.toString(),
-            timeStamp: block.time.toString()
+            timeStamp: block.time.toString(),
+            coinbase: true
         }
 
         await this.prisma.btcTransaction.upsert({
@@ -99,7 +100,7 @@ export class DBHandler {
                 txId: transaction.txid,
                 type: receiver.type
             }
-    
+
             await this.prisma.output.upsert({
                 where: { id: putPkg.id },
                 update: putPkg,
@@ -212,12 +213,13 @@ export class DBHandler {
 
         const pkg = {
             id: transaction.txid,
-            txHash: transaction.hash,
+            txHex: transaction.hex,
             amount: amountReceived.toString(),
             blockHash: block.hash,
             blockNumber: block.height.toString(),
             gas: (amountSent - amountReceived).toString(),
             timeStamp: block.time.toString(),
+            coinbase: false
         }
 
         await this.prisma.btcTransaction.upsert({
