@@ -61,7 +61,7 @@ export class DBHandler {
 
             } else if (results.length > 0) {
                 for (let r = 0; r < results.length; r++) {
-                    let oldBalance = parseInt(results[r].balance)
+                    let oldBalance = parseFloat(results[r].balance)
 
                     const pkg = {
                         id: receiver.address.toLowerCase(),
@@ -118,7 +118,7 @@ export class DBHandler {
 
             } else if (results.length > 0) {
                 for (let r = 0; r < results.length; r++) {
-                    let oldBalance = parseInt(results[r].balance)
+                    let oldBalance = parseFloat(results[r].balance)
 
                     const pkg = {
                         id: receiver.address.toLowerCase(),
@@ -158,7 +158,7 @@ export class DBHandler {
             })
 
             for (let r = 0; r < results.length; r++) {
-                let oldBalance = parseInt(results[r].balance)
+                let oldBalance = parseFloat(results[r].balance)
                 let oldNonce = parseInt(results[r].nonce)
 
                 const pkg = {
