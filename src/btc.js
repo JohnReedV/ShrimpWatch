@@ -104,27 +104,31 @@ class Btc {
     }
 
     getTypes(decodedTX) {
-        if (this.isP2SHTransaction(decodedTX)) {
-            if (this.isMultiSig(decodedTX)) {
-                if (this.isAtomicSwap(decodedTX)) {
+        const P2SH = this.isP2SHTransaction(decodedTX)
+        const multisig = this.isMultiSig(decodedTX)
+        const atomic = this.isAtomicSwap(decodedTX)
+
+        if (P2SH) {
+            if (multisig) {
+                if (atomic) {
                     return ["multi-sig", "P2SH", "atomic"]
                 } else {
                     return ["multi-sig", "P2SH"]
                 }
             } else {
-                if (this.isAtomicSwap(decodedTX)) {
+                if (atomic) {
                     return ["P2SH", "atomic"]
                 } else {
                     return ["P2SH"]
                 }
             }
-        } else if (this.isMultiSig(decodedTX)) {
-            if (this.isAtomicSwap(decodedTX)) {
+        } else if (multisig) {
+            if (atomic) {
                 return ["multi-sig", "atomic"]
             } else {
                 return ["multi-sig"]
             }
-        } else if (this.isAtomicSwap(decodedTX)) {
+        } else if (atomic) {
             return ["atomic"]
         } else { return ["regular"] }
     }
