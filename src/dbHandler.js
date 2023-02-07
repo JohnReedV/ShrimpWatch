@@ -38,9 +38,24 @@ export class DBHandler {
 
     async fillCoinbase(receivers, transaction, block) {
         let amountReceived = 0
+        for (let i = 0; i < receivers.length; i++) { amountReceived = amountReceived + receivers[i].value }
+
+        const pkg = {
+            id: transaction.txid,
+            txHash: transaction.hash,
+            amount: amountReceived.toString(),
+            blockHash: block.hash,
+            blockNumber: block.height.toString(),
+            timeStamp: block.time.toString()
+        }
+
+        await this.prisma.btcTransaction.upsert({
+            where: { id: pkg.id },
+            update: pkg,
+            create: pkg
+        }).catch((e) => { })
 
         for (let i = 0; i < receivers.length; i++) {
-            amountReceived = amountReceived + receivers[i].value
             const receiver = receivers[i]
 
             const results = await this.prisma.btcWallet.findMany({
@@ -76,23 +91,21 @@ export class DBHandler {
                     }).catch((e) => { })
                 }
             }
-        }
 
-        const pkg = {
-            id: transaction.txid,
-            txHash: transaction.hash,
-            amount: amountReceived.toString(),
-            blockHash: block.hash,
-            blockNumber: block.height.toString(),
-            timeStamp: block.time.toString(),
-            types: ["coinbase"]
+            const putPkg = {
+                id: md5(`${transaction.txid}${receiver.address.toLowerCase()}${receiver.index}`),
+                publicKey: receiver.address.toLowerCase(),
+                amount: receiver.value.toString(),
+                txId: transaction.txid,
+                type: receiver.type
+            }
+    
+            await this.prisma.output.upsert({
+                where: { id: putPkg.id },
+                update: putPkg,
+                create: putPkg
+            }).catch((e) => { })
         }
-
-        await this.prisma.btcTransaction.upsert({
-            where: { id: pkg.id },
-            update: pkg,
-            create: pkg
-        }).catch((e) => { })
 
     }
 

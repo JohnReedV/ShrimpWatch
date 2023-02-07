@@ -3,7 +3,6 @@ import { btcQueries } from './btcQueries.js'
 import { DBHandler } from './dbHandler.js'
 import * as fs from 'fs'
 import Bitcore from "bitcore-lib"
-import crypto from 'crypto'
 
 class Btc {
     conf
@@ -48,6 +47,7 @@ class Btc {
                         coinbases.push({
                             address: cbAddress,
                             value: cbValue,
+                            type: decodedTX.vout[c].scriptPubKey.type
                         })
                     }
                 }
