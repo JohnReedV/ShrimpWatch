@@ -138,7 +138,8 @@ export class DBHandler {
                 id: md5(`${txId}${receiver.address.toLowerCase()}${receiver.index}`),
                 publicKey: receiver.address.toLowerCase(),
                 amount: receiver.value.toString(),
-                txId: txId
+                txId: txId,
+                type: receiver.type
             }
 
             await this.prisma.output.upsert({
@@ -177,7 +178,8 @@ export class DBHandler {
                     id: md5(`${txId}${sender.address.toLowerCase()}${sender.index}`),
                     publicKey: sender.address.toLowerCase(),
                     amount: sender.value.toString(),
-                    txId: txId
+                    txId: txId,
+                    type: sender.type
                 }
 
                 await this.prisma.input.upsert({
@@ -189,7 +191,7 @@ export class DBHandler {
         }
     }
 
-    async fillTransactionBtc(transaction, senders, receivers, block, types) {
+    async fillTransactionBtc(transaction, senders, receivers, block) {
         let amountSent = 0
         let amountReceived = 0
         for (let i = 0; i < senders.length; i++) { amountSent = amountSent + senders[i].value }
@@ -203,7 +205,6 @@ export class DBHandler {
             blockNumber: block.height.toString(),
             gas: (amountSent - amountReceived).toString(),
             timeStamp: block.time.toString(),
-            types: types
         }
 
         await this.prisma.btcTransaction.upsert({

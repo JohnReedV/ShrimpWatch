@@ -23,7 +23,6 @@ model btcTransaction {
     blockNumber String?
     gas         String?
     timeStamp   String?
-    types       String[]
     input       input[]
     output      output[]
 }
@@ -33,6 +32,7 @@ model input {
     publicKey String?
     amount    String?
     txId      String?
+    type      String?
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     wallet    btcWallet?      @relation(fields: [publicKey], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -42,6 +42,7 @@ model output {
     publicKey String?
     amount    String?
     txId      String?
+    type      String?
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     wallet    btcWallet?      @relation(fields: [publicKey], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
