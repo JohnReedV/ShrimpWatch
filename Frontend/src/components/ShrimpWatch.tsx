@@ -1,10 +1,11 @@
 import { Component } from 'react'
 import '../App.css'
 
-export default function App() {
-  
+class ShrimpWatch extends Component {
+
+  render() {
     return (
-      <div className="App">
+      <div className="ShrimpWatch">
         <div>
           <a href="https://shrimpwatch.com" target="_blank">
             <img src="src/assets/shrimp512.svg" className="logo" alt="ShrimpWatch Logo" />
@@ -14,3 +15,6 @@ export default function App() {
       </div>
     )
   }
+
+}
+  export default ShrimpWatch
