@@ -16,6 +16,7 @@ class ShrimpWatch extends Component {
         <button className="ethbutton" onClick={this.handleEthButtonClick}> </button>
         <button className="gitbutton" onClick={this.handleGitButtonClick}></button>
         <button className="discordbutton" onClick={this.handleDiscordButtonClick}></button>
+        <button className="twitterbutton" onClick={this.handleTwitterButtonClick}></button>
       </div>
     )
   }
@@ -24,6 +25,7 @@ class ShrimpWatch extends Component {
   handleEthButtonClick = () => { window.location.href = 'https://shrimpwatch.com/ethereum' }
   handleGitButtonClick = () => { window.open('https://github.com/ShrimpWatch/ShrimpWatch') }
   handleDiscordButtonClick = () => { window.open('https://discord.gg/fZgBkgCzGb') }
+  handleTwitterButtonClick = () => { window.open('https://twitter.com/shrimpwatcher') }
 
 }
 export default ShrimpWatch
