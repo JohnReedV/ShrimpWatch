@@ -3,29 +3,57 @@ import '../App.css'
 
 class ShrimpWatch extends Component {
 
+  handleBtcButtonClick = () => {
+    this.setState({ btcbutton: !this.state.btcbutton })
+  }
+
+  handleEthButtonClick = () => {
+    this.setState({ ethbutton: !this.state.ethbutton })
+  }
+
+  defaultPage = <div className="ShrimpWatch">
+  <h1>ShrimpWatch
+    <a href="https://shrimpwatch.com" target="_blank">
+      <img src="src/assets/shrimp512.png" className="logo" alt="ShrimpWatch Logo" />
+    </a>
+  </h1>
+  <h2> {"\u2190"} Select a network {"\u2192"} </h2>
+  <button className="btcbutton" onClick={this.handleBtcButtonClick}> </button>
+  <button className="ethbutton" onClick={this.handleEthButtonClick}> </button>
+  <button className="gitbutton" onClick={this.handleGitButtonClick}></button>
+  <button className="discordbutton" onClick={this.handleDiscordButtonClick}></button>
+  <button className="twitterbutton" onClick={this.handleTwitterButtonClick}></button>
+</div>
+
+  state = {
+    btcbutton: false,
+    ethbutton: false,
+    default: this.defaultPage
+  }
+
   render() {
     return (
-      <div className="ShrimpWatch">
-        <h1>ShrimpWatch
-          <a href="https://shrimpwatch.com" target="_blank">
-            <img src="src/assets/shrimp512.png" className="logo" alt="ShrimpWatch Logo" />
-          </a>
-        </h1>
-        <h2> {"\u2190"} Select a network {"\u2192"} </h2>
-        <button className="btcbutton" onClick={this.handleBtcButtonClick}> </button>
-        <button className="ethbutton" onClick={this.handleEthButtonClick}> </button>
-        <button className="gitbutton" onClick={this.handleGitButtonClick}></button>
-        <button className="discordbutton" onClick={this.handleDiscordButtonClick}></button>
-        <button className="twitterbutton" onClick={this.handleTwitterButtonClick}></button>
+      <div>
+        {this.renderState()}
       </div>
     )
   }
 
-  handleBtcButtonClick = () => { window.location.href = 'https://shrimpwatch.com/bitcoin' }
-  handleEthButtonClick = () => { window.location.href = 'https://shrimpwatch.com/ethereum' }
-  handleGitButtonClick = () => { window.open('https://github.com/ShrimpWatch/ShrimpWatch') }
-  handleDiscordButtonClick = () => { window.open('https://discord.gg/fZgBkgCzGb') }
-  handleTwitterButtonClick = () => { window.open('https://twitter.com/shrimpwatcher') }
+  renderState() {
+    if (this.state.btcbutton) {
+      return <h3>btcpage</h3>
+    }
+    else if (this.state.ethbutton) {
+      return <h3>ethpage</h3>
+    }
+    else {
+      return this.state.default
+    }
+  }
+
+  handleGitButtonClick() { window.open('https://github.com/ShrimpWatch/ShrimpWatch') }
+  handleDiscordButtonClick() { window.open('https://discord.gg/fZgBkgCzGb') }
+  handleTwitterButtonClick() { window.open('https://twitter.com/shrimpwatcher') }
 
 }
 export default ShrimpWatch
