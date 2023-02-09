@@ -42,7 +42,7 @@ h2 {
 .btcbutton {
   width: 20.1em;
   height: 20.1em;
-  background-image: url(./assets/btcbutton.svg);
+  background-image: url(../assets/btcbutton.svg);
   background-size: contain;
   padding: 0em;
   border: 0;
@@ -57,7 +57,7 @@ h2 {
 .ethbutton {
   width: 20.1em;
   height: 20.1em;
-  background-image: url(./assets/ethbutton.svg);
+  background-image: url(../assets/ethbutton.svg);
   background-size: contain;
   padding: 0em;
   border: 0;
@@ -72,7 +72,7 @@ h2 {
 .gitbutton {
   width: 2.5em;
   height: 2.5em;
-  background-image: url(./assets/github.svg);
+  background-image: url(../assets/github.svg);
   background-size: contain;
   padding: 0em;
   border: 0;
@@ -89,7 +89,7 @@ h2 {
 .discordbutton {
   width: 3em;
   height: 3em;
-  background-image: url(./assets/discord.svg);
+  background-image: url(../assets/discord.svg);
   background-size: contain;
   padding: 0em;
   border: 0;
@@ -106,7 +106,7 @@ h2 {
 .twitterbutton {
   width: 3em;
   height: 3em;
-  background-image: url(./assets/twitter.svg);
+  background-image: url(../assets/twitter.svg);
   background-size: contain;
   padding: 0em;
   border: 0;

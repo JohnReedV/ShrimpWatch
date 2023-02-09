@@ -1,7 +1,11 @@
 import { Component } from 'react'
-import '../App.css'
+import '../styles/ShrimpWatch.css'
+import { Bitcoin } from './bitcoin'
+import { Ethereum } from './ethereum'
 
 class ShrimpWatch extends Component {
+  bitcoin = new Bitcoin()
+  ethereum = new Ethereum()
 
   handleBtcButtonClick = () => {
     this.setState({ btcbutton: !this.state.btcbutton })
@@ -12,18 +16,18 @@ class ShrimpWatch extends Component {
   }
 
   defaultPage = <div className="ShrimpWatch">
-  <h1>ShrimpWatch
-    <a href="https://shrimpwatch.com" target="_blank">
-      <img src="src/assets/shrimp512.png" className="logo" alt="ShrimpWatch Logo" />
-    </a>
-  </h1>
-  <h2> {"\u2190"} Select a network {"\u2192"} </h2>
-  <button className="btcbutton" onClick={this.handleBtcButtonClick}> </button>
-  <button className="ethbutton" onClick={this.handleEthButtonClick}> </button>
-  <button className="gitbutton" onClick={this.handleGitButtonClick}></button>
-  <button className="discordbutton" onClick={this.handleDiscordButtonClick}></button>
-  <button className="twitterbutton" onClick={this.handleTwitterButtonClick}></button>
-</div>
+    <h1>ShrimpWatch
+      <a href="https://shrimpwatch.com" target="_blank">
+        <img src="src/assets/shrimp512.png" className="logo" alt="ShrimpWatch Logo" />
+      </a>
+    </h1>
+    <h2> {"\u2190"} Select a network {"\u2192"} </h2>
+    <button className="btcbutton" onClick={this.handleBtcButtonClick}> </button>
+    <button className="ethbutton" onClick={this.handleEthButtonClick}> </button>
+    <button className="gitbutton" onClick={this.handleGitButtonClick}></button>
+    <button className="discordbutton" onClick={this.handleDiscordButtonClick}></button>
+    <button className="twitterbutton" onClick={this.handleTwitterButtonClick}></button>
+  </div>
 
   state = {
     btcbutton: false,
@@ -41,10 +45,10 @@ class ShrimpWatch extends Component {
 
   renderState() {
     if (this.state.btcbutton) {
-      return <h3>btcpage</h3>
+      return this.bitcoin.btc()
     }
     else if (this.state.ethbutton) {
-      return <h3>ethpage</h3>
+      return this.ethereum.eth()
     }
     else {
       return this.state.default
