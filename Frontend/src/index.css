@@ -17,17 +17,7 @@
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  place-items: top;
   min-width: 320px;
   min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-  color: transparent;
-  background-image: linear-gradient(to right, 
-    #91f9ac, #5ce1a4, #71eaa8, #4cd4a4, #3dd1a4, #2bcca3, #19c09d);
-  -webkit-background-clip: text;
-  background-clip: text;
 }

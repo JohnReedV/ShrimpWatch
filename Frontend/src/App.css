@@ -1,16 +1,56 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0rem;
   text-align: center;
 }
 
+h1 {
+  font-size: 7em;
+  line-height: 1.1;
+  color: transparent;
+  background-image: linear-gradient(to right, 
+    #91f9ac, #5ce1a4, #71eaa8, #4cd4a4, #3dd1a4, #2bcca3, #19c09d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  position: relative;
+  bottom: .75em;
+  left: .2em;
+}
+
 .logo {
-  height: 6em;
-  padding: 1.5em;
+  height: 2em;
+  padding: 0em;
   will-change: filter;
   transition: filter 300ms;
+  position: relative;
+  bottom: -.4em;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+.btcbutton {
+  width: 20em;
+  height: 20em;
+  background-image: url(./assets/btcbutton.svg);
+  background-size: contain;
+  padding: 0em;
+  border: 0;
+  background-color: transparent;
+  float: left;
+}
+.btcbutton:hover {
+  filter: drop-shadow(0 0 1em #3dd1a4);
+}
+
+.ethbutton {
+  width: 20em;
+  height: 20em;
+  background-image: url(./assets/ethbutton.svg);
+  background-size: contain;
+  padding: 0em;
+  border: 0;
+  background-color: transparent;
+  float: right;
+}
+.ethbutton:hover {
+  filter: drop-shadow(0 0 1em #3dd1a4);
 }
