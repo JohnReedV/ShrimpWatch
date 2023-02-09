@@ -68,3 +68,19 @@ h2 {
 .ethbutton:hover {
   filter: drop-shadow(0 0 1em #3dd1a4);
 }
+
+.gitbutton {
+  width: 2.5em;
+  height: 2.5em;
+  background-image: url(./assets/github.svg);
+  background-size: contain;
+  padding: 0em;
+  border: 0;
+  background-color: transparent;
+  position:absolute;
+  bottom:0;
+  transition: filter 0.2s ease-in-out;
+}
+.gitbutton:hover {
+  filter: drop-shadow(0 0 .5em #8a0606);
+}
