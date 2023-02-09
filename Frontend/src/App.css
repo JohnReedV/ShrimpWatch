@@ -78,9 +78,27 @@ h2 {
   border: 0;
   background-color: transparent;
   position:absolute;
-  bottom:0;
+  bottom:.1em;
+  right:72em;
   transition: filter 0.2s ease-in-out;
 }
 .gitbutton:hover {
+  filter: drop-shadow(0 0 .5em #8a0606);
+}
+
+.discordbutton {
+  width: 3em;
+  height: 3em;
+  background-image: url(./assets/discord.svg);
+  background-size: contain;
+  padding: 0em;
+  border: 0;
+  background-color: transparent;
+  position:absolute;
+  bottom:0em;
+  right:68em;
+  transition: filter 0.2s ease-in-out;
+}
+.discordbutton:hover {
   filter: drop-shadow(0 0 .5em #8a0606);
 }

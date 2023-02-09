@@ -14,14 +14,16 @@ class ShrimpWatch extends Component {
         <h2> {"\u2190"} Select a network {"\u2192"} </h2>
         <button className="btcbutton" onClick={this.handleBtcButtonClick}> </button>
         <button className="ethbutton" onClick={this.handleEthButtonClick}> </button>
-        <button className ="gitbutton" onClick={this.handleGitButtonClick}></button>
+        <button className="gitbutton" onClick={this.handleGitButtonClick}></button>
+        <button className="discordbutton" onClick={this.handleDiscordButtonClick}></button>
       </div>
     )
   }
 
   handleBtcButtonClick = () => { window.location.href = 'https://shrimpwatch.com/bitcoin' }
   handleEthButtonClick = () => { window.location.href = 'https://shrimpwatch.com/ethereum' }
-  handleGitButtonClick = () => { window.open('https://github.com/JohnReedV/ShrimpWatch') }
+  handleGitButtonClick = () => { window.open('https://github.com/ShrimpWatch/ShrimpWatch') }
+  handleDiscordButtonClick = () => { window.open('https://discord.gg/fZgBkgCzGb') }
 
 }
 export default ShrimpWatch
