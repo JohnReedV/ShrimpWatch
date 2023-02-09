@@ -18,6 +18,18 @@ h1 {
   left: .2em;
 }
 
+h2 {
+  font-size: 1.7em;
+  line-height: 1.1;
+  color: transparent;
+  background-image: linear-gradient(to right, 
+    #f9a039,  #d96a9c,  #647ded);
+  -webkit-background-clip: text;
+  background-clip: text;
+  position: relative;
+  top: 6em;
+}
+
 .logo {
   height: 2em;
   padding: 0em;
@@ -28,28 +40,30 @@ h1 {
 }
 
 .btcbutton {
-  width: 20em;
-  height: 20em;
+  width: 20.1em;
+  height: 20.1em;
   background-image: url(./assets/btcbutton.svg);
   background-size: contain;
   padding: 0em;
   border: 0;
   background-color: transparent;
   float: left;
+  transition: filter 0.2s ease-in-out;
 }
 .btcbutton:hover {
   filter: drop-shadow(0 0 1em #3dd1a4);
 }
 
 .ethbutton {
-  width: 20em;
-  height: 20em;
+  width: 20.1em;
+  height: 20.1em;
   background-image: url(./assets/ethbutton.svg);
   background-size: contain;
   padding: 0em;
   border: 0;
   background-color: transparent;
   float: right;
+  transition: filter 0.2s ease-in-out;
 }
 .ethbutton:hover {
   filter: drop-shadow(0 0 1em #3dd1a4);
