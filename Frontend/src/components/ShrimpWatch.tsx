@@ -1,10 +1,9 @@
 import { Component } from 'react'
 import '../styles/ShrimpWatch.css'
-import { Bitcoin } from './bitcoin'
+import Bitcoin from './bitcoin'
 import { Ethereum } from './ethereum'
 
 class ShrimpWatch extends Component {
-  bitcoin = new Bitcoin()
   ethereum = new Ethereum()
 
   handleBtcButtonClick = () => {
@@ -45,7 +44,7 @@ class ShrimpWatch extends Component {
 
   renderState() {
     if (this.state.btcbutton) {
-      return this.bitcoin.btc()
+      return Bitcoin()
     }
     else if (this.state.ethbutton) {
       return this.ethereum.eth()

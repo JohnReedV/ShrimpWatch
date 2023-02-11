@@ -11,7 +11,7 @@
     "dbstart": "sudo docker start ShrimpWatch && sudo docker logs -f ShrimpWatch",
     "dbstop": "sudo docker stop ShrimpWatch",
     "dbsize": "sudo docker exec ShrimpWatch bash -c 'du -sh /var/lib/postgresql/data/'",
-    "pg": "npx postgraphile -c 'postgres://john:let-me-in@localhost/shrimpwatch?connection_limit=500' --watch --enhance-graphiql --dynamic-json"
+    "pg": "npx postgraphile --cors -c 'postgres://john:let-me-in@localhost/shrimpwatch?connection_limit=500' --watch --enhance-graphiql --dynamic-json"
   },
   "repository": {
     "type": "git",
