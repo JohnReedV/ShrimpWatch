@@ -7,12 +7,29 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model balanceHistoryBtc {
+    id        String     @unique
+    walletId  String?
+    balance   Decimal?   @db.Decimal
+    timeStamp Decimal?   @db.Decimal
+    btcWallet btcWallet? @relation(fields: [walletId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "balance_btcwallet_fkey")
+}
+
+model balanceHistoryEth {
+    id        String     @unique
+    walletId  String?
+    balance   Decimal?   @db.Decimal
+    timeStamp Decimal?   @db.Decimal
+    evmWallet evmWallet? @relation(fields: [walletId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "balance_evmwallet_fkey")
+}
+
 model btcWallet {
-    id      String   @unique //ID is public key
-    balance Decimal? @db.Decimal
-    nonce   Decimal? @db.Decimal
-    input   input[]
-    output  output[]
+    id       String        @unique //ID is public key
+    balance  Decimal?      @db.Decimal
+    nonce    Decimal?      @db.Decimal
+    balances balanceHistoryBtc[]
+    input    input[]
+    output   output[]
 }
 
 model btcTransaction {
@@ -70,6 +87,7 @@ model evmWallet {
     id                 String           @unique //ID is public key
     balance            Decimal?         @db.Decimal
     nonce              Decimal?         @db.Decimal
+    balances           balanceHistoryEth[]
     transactionFromEth ethTransaction[] @relation(name: "fromwallet")
     transactionToEth   ethTransaction[] @relation(name: "towallet")
 }

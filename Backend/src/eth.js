@@ -44,7 +44,7 @@ class Eth {
                     await this.db.fillTransactionEth(transaction, currentBlock, "fromContract")
                 } else {
                     // regular transfer
-                    await this.db.fillWalletEth(transaction, this.web3, "regular")
+                    await this.db.fillWalletEth(transaction, this.web3, currentBlock.timestamp, "regular")
                     await this.db.fillTransactionEth(transaction, currentBlock, "regular")
                 }
             } else if (transaction.input.startsWith('0xa9059cbb')) {

@@ -75,6 +75,15 @@ export class DBHandler {
                     }
                 }).catch((e) => { })
 
+                await this.prisma.balanceHistoryBtc.create({
+                    data: {
+                        id: md5(`${transaction.txid}${receiver.address.toLowerCase()}${receiver.index}`),
+                        walletId: receiver.address.toLowerCase(),
+                        balance: parseFloat(receiver.value),
+                        timeStamp: parseFloat(block.time),
+                    }
+                }).catch((e) => { })
+
             } else if (results.length > 0) {
                 for (let r = 0; r < results.length; r++) {
                     let oldBalance = parseFloat(results[r].balance)
@@ -89,6 +98,15 @@ export class DBHandler {
                         where: { id: pkg.id },
                         update: pkg,
                         create: pkg
+                    }).catch((e) => { })
+
+                    await this.prisma.balanceHistoryBtc.create({
+                        data: {
+                            id: md5(`${transaction.txid}${receiver.address.toLowerCase()}${receiver.index}`),
+                            walletId: receiver.address.toLowerCase(),
+                            balance: (oldBalance + receiver.value),
+                            timeStamp: parseFloat(block.time),
+                        }
                     }).catch((e) => { })
                 }
             }
@@ -110,7 +128,7 @@ export class DBHandler {
 
     }
 
-    async fillBtcWallet(senders, receivers, txId) {
+    async fillBtcWallet(senders, receivers, txId, timeStamp) {
         for (let i = 0; i < receivers.length; i++) {
             const receiver = receivers[i]
 
@@ -130,6 +148,15 @@ export class DBHandler {
                     }
                 }).catch((e) => { })
 
+                await this.prisma.balanceHistoryBtc.create({
+                    data: {
+                        id: md5(`${txId}${receiver.address.toLowerCase()}${receiver.index}`),
+                        walletId: receiver.address.toLowerCase(),
+                        balance: parseFloat(receiver.value),
+                        timeStamp: timeStamp
+                    }
+                }).catch((e) => { })
+
             } else if (results.length > 0) {
                 for (let r = 0; r < results.length; r++) {
                     let oldBalance = parseFloat(results[r].balance)
@@ -144,6 +171,15 @@ export class DBHandler {
                         where: { id: pkg.id },
                         update: pkg,
                         create: pkg
+                    }).catch((e) => { })
+
+                    await this.prisma.balanceHistoryBtc.create({
+                        data: {
+                            id: md5(`${txId}${receiver.address.toLowerCase()}${receiver.index}`),
+                            walletId: receiver.address.toLowerCase(),
+                            balance: (oldBalance + receiver.value),
+                            timeStamp: timeStamp
+                        }
                     }).catch((e) => { })
                 }
             }
@@ -186,6 +222,15 @@ export class DBHandler {
                     where: { id: pkg.id },
                     update: pkg,
                     create: pkg
+                }).catch((e) => { })
+
+                await this.prisma.balanceHistoryBtc.create({
+                    data: {
+                        id: md5(`${txId}${sender.address.toLowerCase()}${sender.index}`),
+                        walletId: sender.address.toLowerCase(),
+                        balance: (oldBalance - sender.value),
+                        timeStamp: timeStamp
+                    }
                 }).catch((e) => { })
 
                 const putPkg = {
@@ -254,11 +299,13 @@ export class DBHandler {
         }).catch((e) => { })
     }
 
-    async fillWalletEth(transaction, web3, type) {
+    async fillWalletEth(transaction, web3, timeStamp, type) {
 
         if (type == "toContract") {
             const nonceFrom = await web3.eth.getTransactionCount(transaction.from, 'latest')
-            const blanceFrom = await web3.eth.getBalance(transaction.from)
+            const blanceFromWei = await web3.eth.getBalance(transaction.from)
+            const blanceFrom = await web3.utils.fromWei(blanceFromWei, 'ether')
+            const balanceFromAtBlock = await web3.eth.getBalance(transaction.from, transaction.blockNumber)
 
             const pkgFrom = {
                 id: transaction.from.toLowerCase(),
@@ -270,11 +317,22 @@ export class DBHandler {
                 where: { id: pkgFrom.id },
                 update: pkgFrom,
                 create: pkgFrom
+            }).catch((e) => { })
+
+            await this.prisma.balanceHistoryEth.create({
+                data: {
+                    id: md5(`${transaction.hash}${transaction.from.toLowerCase()}${transaction.transactionIndex}`),
+                    walletId: transaction.from.toLowerCase(),
+                    balance: parseFloat(balanceFromAtBlock),
+                    timeStamp: timeStamp
+                }
             }).catch((e) => { })
 
         } else if (type == "fromContract") {
             const nonceTo = await web3.eth.getTransactionCount(transaction.to, 'latest')
-            const blanceTo = await web3.eth.getBalance(transaction.to)
+            const blanceToWei = await web3.eth.getBalance(transaction.to)
+            const blanceTo= await web3.utils.fromWei(blanceToWei, 'ether')
+            const balanceToAtBlock = await web3.eth.getBalance(transaction.to, transaction.blockNumber)
 
             const pkgTo = {
                 id: transaction.to.toLowerCase(),
@@ -288,11 +346,23 @@ export class DBHandler {
                 create: pkgTo
             }).catch((e) => { })
 
+            await this.prisma.balanceHistoryEth.create({
+                data: {
+                    id: md5(`${transaction.hash}${transaction.to.toLowerCase()}${transaction.transactionIndex}`),
+                    walletId: transaction.to.toLowerCase(),
+                    balance: parseFloat(balanceToAtBlock),
+                    timeStamp: timeStamp
+                }
+            }).catch((e) => { })
+
         } else if (type == "regular") {
             const nonceTo = await web3.eth.getTransactionCount(transaction.to, 'latest')
-            const blanceTo = await web3.eth.getBalance(transaction.to)
+            const blanceToWei = await web3.eth.getBalance(transaction.to)
+            const blanceTo = await web3.utils.fromWei(blanceToWei, 'ether')
+
             const nonceFrom = await web3.eth.getTransactionCount(transaction.from, 'latest')
-            const blanceFrom = await web3.eth.getBalance(transaction.from)
+            const blanceFromWei = await web3.eth.getBalance(transaction.from)
+            const blanceFrom = await web3.utils.fromWei(blanceFromWei, 'ether')
 
             const pkgFrom = {
                 id: transaction.from.toLowerCase(),
@@ -316,6 +386,24 @@ export class DBHandler {
                 where: { id: pkgFrom.id },
                 update: pkgFrom,
                 create: pkgFrom
+            }).catch((e) => { })
+
+            await this.prisma.balanceHistoryEth.create({
+                data: {
+                    id: md5(`${transaction.hash}${transaction.from.toLowerCase()}${transaction.transactionIndex}`),
+                    walletId: transaction.from.toLowerCase(),
+                    balance: parseFloat(blanceFrom),
+                    timeStamp: timeStamp
+                }
+            }).catch((e) => { })
+
+            await this.prisma.balanceHistoryEth.create({
+                data: {
+                    id: md5(`${transaction.hash}${transaction.to.toLowerCase()}${transaction.transactionIndex}`),
+                    walletId: transaction.to.toLowerCase(),
+                    balance: parseFloat(blanceTo),
+                    timeStamp: timeStamp
+                }
             }).catch((e) => { })
         }
     }

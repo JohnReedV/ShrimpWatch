@@ -59,7 +59,7 @@ class Btc {
                 let receivers = await this.getReceivers(decodedTX)
 
                 await this.db.fillTransactionBtc(rawTX, senders, receivers, block)
-                await this.db.fillBtcWallet(senders, receivers, rawTX.txid)
+                await this.db.fillBtcWallet(senders, receivers, rawTX.txid, parseFloat(block.time))
 
             }
         }
