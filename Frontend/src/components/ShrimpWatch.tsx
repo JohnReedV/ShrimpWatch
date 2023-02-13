@@ -20,7 +20,7 @@ class ShrimpWatch extends Component {
         <img src="src/assets/shrimp512.png" className="logo" alt="ShrimpWatch Logo" />
       </a>
     </h1>
-    <h2> {"\u2190"} Select a network {"\u2192"} </h2>
+    <h2> {"\u2190"} Select Network {"\u2192"} </h2>
     <button className="btcbutton" onClick={this.handleBtcButtonClick}> </button>
     <button className="ethbutton" onClick={this.handleEthButtonClick}> </button>
     <button className="gitbutton" onClick={this.handleGitButtonClick}></button>
