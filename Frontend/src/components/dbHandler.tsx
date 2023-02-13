@@ -1,6 +1,7 @@
 import React from 'react'
 import { useQuery } from 'react-query'
 import axios from 'axios'
+import { BitcoinTransaction } from './IQueries'
 import '../styles/Loading.css'
 
 const axiosInstance = axios.create({
@@ -36,16 +37,6 @@ const latestTxQuery = () => {
 
 export const GetLatestBitcoinTx = () => {
 
-  type BitcoinTransaction = {
-    id: string,
-    timeStamp: string,
-    txHex: string,
-    blockNumber: string,
-    blockHash: string,
-    amount: string,
-    gas: string,
-    coinbase: string
-  }
 
   const { data, isLoading, error } = latestTxQuery()
 
