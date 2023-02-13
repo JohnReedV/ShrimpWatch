@@ -37,7 +37,6 @@ const latestTxQuery = () => {
 
 export const GetLatestBitcoinTx = () => {
 
-
   const { data, isLoading, error } = latestTxQuery()
 
   if (isLoading) return Loading()
