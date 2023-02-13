@@ -43,10 +43,10 @@ export class DBHandler {
         const pkg = {
             id: transaction.txid,
             txHex: transaction.hex,
-            amount: amountReceived.toString(),
+            amount: parseFloat(amountReceived),
             blockHash: block.hash,
-            blockNumber: block.height.toString(),
-            timeStamp: block.time.toString(),
+            blockNumber: parseInt(block.height),
+            timeStamp: parseFloat(block.time),
             coinbase: true
         }
 
@@ -70,8 +70,8 @@ export class DBHandler {
                 await this.prisma.btcWallet.create({
                     data: {
                         id: receiver.address.toLowerCase(),
-                        balance: receiver.value.toString(),
-                        nonce: "0",
+                        balance: parseFloat(receiver.value),
+                        nonce: 0,
                     }
                 }).catch((e) => { })
 
@@ -81,7 +81,7 @@ export class DBHandler {
 
                     const pkg = {
                         id: receiver.address.toLowerCase(),
-                        balance: (oldBalance + receiver.value).toString(),
+                        balance: (oldBalance + receiver.value),
                         nonce: results[r].nonce,
                     }
 
@@ -96,7 +96,7 @@ export class DBHandler {
             const putPkg = {
                 id: md5(`${transaction.txid}${receiver.address.toLowerCase()}${receiver.index}`),
                 publicKey: receiver.address.toLowerCase(),
-                amount: receiver.value.toString(),
+                amount: parseFloat(receiver.value),
                 txId: transaction.txid,
                 type: receiver.type
             }
@@ -125,8 +125,8 @@ export class DBHandler {
                 await this.prisma.btcWallet.create({
                     data: {
                         id: receiver.address.toLowerCase(),
-                        balance: receiver.value.toString(),
-                        nonce: "0",
+                        balance: parseFloat(receiver.value),
+                        nonce: 0,
                     }
                 }).catch((e) => { })
 
@@ -136,7 +136,7 @@ export class DBHandler {
 
                     const pkg = {
                         id: receiver.address.toLowerCase(),
-                        balance: (oldBalance + receiver.value).toString(),
+                        balance: (oldBalance + receiver.value),
                         nonce: results[r].nonce,
                     }
 
@@ -178,8 +178,8 @@ export class DBHandler {
 
                 const pkg = {
                     id: sender.address.toLowerCase(),
-                    balance: (oldBalance - sender.value).toString(),
-                    nonce: (oldNonce++).toString(),
+                    balance: (oldBalance - sender.value),
+                    nonce: (oldNonce++)
                 }
 
                 await this.prisma.btcWallet.upsert({
@@ -191,7 +191,7 @@ export class DBHandler {
                 const putPkg = {
                     id: md5(`${txId}${sender.address.toLowerCase()}${sender.index}`),
                     publicKey: sender.address.toLowerCase(),
-                    amount: sender.value.toString(),
+                    amount: parseFloat(sender.value),
                     txId: txId,
                     type: sender.type
                 }
@@ -214,11 +214,11 @@ export class DBHandler {
         const pkg = {
             id: transaction.txid,
             txHex: transaction.hex,
-            amount: amountReceived.toString(),
+            amount: amountReceived,
             blockHash: block.hash,
-            blockNumber: block.height.toString(),
-            gas: (amountSent - amountReceived).toString(),
-            timeStamp: block.time.toString(),
+            blockNumber: parseInt(block.height),
+            gas: (amountSent - amountReceived),
+            timeStamp: parseFloat(block.time),
             coinbase: false
         }
 
@@ -235,15 +235,15 @@ export class DBHandler {
             id: transaction.hash,
             from: transaction.from.toLowerCase(),
             to: transaction.to.toLowerCase(),
-            amount: transaction.value.toString(),
+            amount: parseFloat(transaction.value),
             blockHash: transaction.blockHash,
-            blockNumber: transaction.blockNumber.toString(),
-            baseFeePerGas: block.baseFeePerGas.toString(),
-            gasUsed: transaction.gas.toString(),
-            gasPrice: transaction.gasPrice,
-            feePerGas: transaction.maxFeePerGas,
-            priorityFeeperGas: transaction.maxPriorityFeePerGas,
-            timeStamp: block.timestamp.toString(),
+            blockNumber: parseInt(transaction.blockNumber),
+            baseFeePerGas: parseFloat(block.baseFeePerGas),
+            gasUsed: parseFloat(transaction.gas),
+            gasPrice: parseFloat(transaction.gasPrice),
+            feePerGas: parseFloat(transaction.maxFeePerGas),
+            priorityFeeperGas: parseFloat(transaction.maxPriorityFeePerGas),
+            timeStamp: parseFloat(block.timestamp),
             type: type
         }
 
@@ -262,8 +262,8 @@ export class DBHandler {
 
             const pkgFrom = {
                 id: transaction.from.toLowerCase(),
-                balance: blanceFrom.toString(),
-                nonce: nonceFrom.toString()
+                balance: parseFloat(blanceFrom),
+                nonce: parseInt(nonceFrom)
             }
 
             await this.prisma.evmWallet.upsert({
@@ -278,8 +278,8 @@ export class DBHandler {
 
             const pkgTo = {
                 id: transaction.to.toLowerCase(),
-                balance: blanceTo.toString(),
-                nonce: nonceTo.toString()
+                balance: parseFloat(blanceTo),
+                nonce: parseInt(nonceTo)
             }
 
             await this.prisma.evmWallet.upsert({
@@ -296,14 +296,14 @@ export class DBHandler {
 
             const pkgFrom = {
                 id: transaction.from.toLowerCase(),
-                balance: blanceFrom.toString(),
-                nonce: nonceFrom.toString()
+                balance: parseFloat(blanceFrom),
+                nonce: parseInt(nonceFrom)
             }
 
             const pkgTo = {
                 id: transaction.to.toLowerCase(),
-                balance: blanceTo.toString(),
-                nonce: nonceTo.toString()
+                balance: parseFloat(blanceTo),
+                nonce: parseInt(nonceTo)
             }
 
             await this.prisma.evmWallet.upsert({

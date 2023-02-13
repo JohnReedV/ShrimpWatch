@@ -9,8 +9,8 @@ datasource db {
 
 model btcWallet {
     id      String   @unique //ID is public key
-    balance String?
-    nonce   String?
+    balance Decimal? @db.Decimal
+    nonce   Decimal? @db.Decimal
     input   input[]
     output  output[]
 }
@@ -18,11 +18,11 @@ model btcWallet {
 model btcTransaction {
     id          String   @unique //ID is txid
     txHex       String?
-    amount      String?
+    amount      Decimal? @db.Decimal
     blockHash   String?
-    blockNumber String?
-    gas         String?
-    timeStamp   String?
+    blockNumber Decimal? @db.Decimal
+    gas         Decimal? @db.Decimal
+    timeStamp   Decimal? @db.Decimal
     coinbase    Boolean?
     input       input[]
     output      output[]
@@ -31,7 +31,7 @@ model btcTransaction {
 model input {
     id        String          @unique
     publicKey String?
-    amount    String?
+    amount    Decimal?        @db.Decimal
     txId      String?
     type      String?
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -41,7 +41,7 @@ model input {
 model output {
     id        String          @unique
     publicKey String?
-    amount    String?
+    amount    Decimal?        @db.Decimal
     txId      String?
     type      String?
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -52,15 +52,15 @@ model ethTransaction {
     id                String     @unique //ID is txHash
     from              String?
     to                String?
-    amount            String?
+    amount            Decimal?   @db.Decimal
     blockHash         String?
-    blockNumber       String?
-    baseFeePerGas     String?
-    gasUsed           String?
-    gasPrice          String?
-    feePerGas         String?
-    priorityFeeperGas String?
-    timeStamp         String? //block timestamp
+    blockNumber       Decimal?   @db.Decimal
+    baseFeePerGas     Decimal?   @db.Decimal
+    gasUsed           Decimal?   @db.Decimal
+    gasPrice          Decimal?   @db.Decimal
+    feePerGas         Decimal?   @db.Decimal
+    priorityFeeperGas Decimal?   @db.Decimal
+    timeStamp         Decimal?   @db.Decimal //block timestamp
     type              String?
     fromWallet        evmWallet? @relation(fields: [from], references: [id], name: "fromwallet", onDelete: NoAction, onUpdate: NoAction)
     toWallet          evmWallet? @relation(fields: [to], references: [id], name: "towallet", onDelete: NoAction, onUpdate: NoAction)
@@ -68,8 +68,8 @@ model ethTransaction {
 
 model evmWallet {
     id                 String           @unique //ID is public key
-    balance            String?
-    nonce              String?
+    balance            Decimal?         @db.Decimal
+    nonce              Decimal?         @db.Decimal
     transactionFromEth ethTransaction[] @relation(name: "fromwallet")
     transactionToEth   ethTransaction[] @relation(name: "towallet")
 }
