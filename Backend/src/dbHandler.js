@@ -287,13 +287,17 @@ export class DBHandler {
                 create: pkgFrom
             }).catch((e) => { })
 
-            await this.prisma.balanceHistoryEth.create({
-                data: {
-                    id: md5(`${transaction.hash}${transaction.from.toLowerCase()}${transaction.transactionIndex}`),
-                    walletId: transaction.from.toLowerCase(),
-                    balance: parseFloat(balanceFromAtBlock),
-                    timeStamp: timeStamp
-                }
+            const pkgFromHistory = {
+                id: md5(`${transaction.hash}${transaction.from.toLowerCase()}${transaction.transactionIndex}`),
+                walletId: transaction.from.toLowerCase(),
+                balance: parseFloat(balanceFromAtBlock),
+                timeStamp: timeStamp
+            }
+
+            await this.prisma.balanceHistoryEth.upsert({
+                where: { id: pkgFromHistory.id },
+                update: pkgFromHistory,
+                create: pkgFromHistory
             }).catch((e) => { })
 
         } else if (type == "fromContract") {
@@ -314,13 +318,17 @@ export class DBHandler {
                 create: pkgTo
             }).catch((e) => { })
 
-            await this.prisma.balanceHistoryEth.create({
-                data: {
-                    id: md5(`${transaction.hash}${transaction.to.toLowerCase()}${transaction.transactionIndex}`),
-                    walletId: transaction.to.toLowerCase(),
-                    balance: parseFloat(balanceToAtBlock),
-                    timeStamp: timeStamp
-                }
+            const pkgToHistory = {
+                id: md5(`${transaction.hash}${transaction.to.toLowerCase()}${transaction.transactionIndex}`),
+                walletId: transaction.to.toLowerCase(),
+                balance: parseFloat(balanceToAtBlock),
+                timeStamp: timeStamp
+            }
+
+            await this.prisma.balanceHistoryEth.upsert({
+                where: { id: pkgToHistory.id },
+                update: pkgToHistory,
+                create: pkgToHistory
             }).catch((e) => { })
 
         } else if (type == "regular") {
@@ -356,22 +364,30 @@ export class DBHandler {
                 create: pkgFrom
             }).catch((e) => { })
 
-            await this.prisma.balanceHistoryEth.create({
-                data: {
-                    id: md5(`${transaction.hash}${transaction.from.toLowerCase()}${transaction.transactionIndex}`),
-                    walletId: transaction.from.toLowerCase(),
-                    balance: parseFloat(blanceFrom),
-                    timeStamp: timeStamp
-                }
+            const pkgToHistory = {
+                id: md5(`${transaction.hash}${transaction.to.toLowerCase()}${transaction.transactionIndex}`),
+                walletId: transaction.to.toLowerCase(),
+                balance: parseFloat(blanceTo),
+                timeStamp: timeStamp
+            }
+
+            const pkgFromHistory = {
+                id: md5(`${transaction.hash}${transaction.from.toLowerCase()}${transaction.transactionIndex}`),
+                walletId: transaction.from.toLowerCase(),
+                balance: parseFloat(blanceFrom),
+                timeStamp: timeStamp
+            }
+
+            await this.prisma.balanceHistoryEth.upsert({
+                where: { id: pkgToHistory.id },
+                update: pkgToHistory,
+                create: pkgToHistory
             }).catch((e) => { })
 
-            await this.prisma.balanceHistoryEth.create({
-                data: {
-                    id: md5(`${transaction.hash}${transaction.to.toLowerCase()}${transaction.transactionIndex}`),
-                    walletId: transaction.to.toLowerCase(),
-                    balance: parseFloat(blanceTo),
-                    timeStamp: timeStamp
-                }
+            await this.prisma.balanceHistoryEth.upsert({
+                where: { id: pkgFromHistory.id },
+                update: pkgFromHistory,
+                create: pkgFromHistory
             }).catch((e) => { })
         }
     }
