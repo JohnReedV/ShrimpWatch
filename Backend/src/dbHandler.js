@@ -67,12 +67,16 @@ export class DBHandler {
             })
 
             if (results.length == 0) {
-                await this.prisma.btcWallet.create({
-                    data: {
-                        id: receiver.address.toLowerCase(),
-                        balance: parseFloat(receiver.value),
-                        nonce: 0,
-                    }
+                const pkg = {
+                    id: receiver.address.toLowerCase(),
+                    balance: parseFloat(receiver.value),
+                    nonce: 0,
+                }
+
+                await this.prisma.btcWallet.upsert({
+                    where: { id: pkg.id },
+                    update: pkg,
+                    create: pkg
                 }).catch((e) => { })
 
             } else if (results.length > 0) {
@@ -122,14 +126,17 @@ export class DBHandler {
             })
 
             if (results.length == 0) {
-                await this.prisma.btcWallet.create({
-                    data: {
-                        id: receiver.address.toLowerCase(),
-                        balance: parseFloat(receiver.value),
-                        nonce: 0,
-                    }
-                }).catch((e) => { })
+                const pkg = {
+                    id: receiver.address.toLowerCase(),
+                    balance: parseFloat(receiver.value),
+                    nonce: 0,
+                }
 
+                await this.prisma.btcWallet.upsert({
+                    where: { id: pkg.id },
+                    update: pkg,
+                    create: pkg
+                }).catch((e) => { })
 
             } else if (results.length > 0) {
                 for (let r = 0; r < results.length; r++) {
@@ -177,11 +184,15 @@ export class DBHandler {
             for (let r = 0; r < results.length; r++) {
                 let oldBalance = parseFloat(results[r].balance)
                 let oldNonce = parseInt(results[r].nonce)
+                let newBalance = oldBalance - sender.value
 
+                if (newBalance < 0) {
+                    this.delay(10000)
+                }
                 const pkg = {
                     id: sender.address.toLowerCase(),
-                    balance: (oldBalance - sender.value),
-                    nonce: (oldNonce++)
+                    balance: newBalance,
+                    nonce: oldNonce += 1
                 }
 
                 await this.prisma.btcWallet.upsert({
@@ -364,6 +375,9 @@ export class DBHandler {
                 }
             }).catch((e) => { })
         }
+    }
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
