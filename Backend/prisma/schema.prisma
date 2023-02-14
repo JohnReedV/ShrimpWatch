@@ -7,14 +7,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model balanceHistoryBtc {
-    id        String     @unique
-    walletId  String?
-    balance   Decimal?   @db.Decimal
-    timeStamp Decimal?   @db.Decimal
-    btcWallet btcWallet? @relation(fields: [walletId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "balance_btcwallet_fkey")
-}
-
 model balanceHistoryEth {
     id        String     @unique
     walletId  String?
@@ -24,12 +16,11 @@ model balanceHistoryEth {
 }
 
 model btcWallet {
-    id       String        @unique //ID is public key
-    balance  Decimal?      @db.Decimal
-    nonce    Decimal?      @db.Decimal
-    balances balanceHistoryBtc[]
-    input    input[]
-    output   output[]
+    id      String   @unique //ID is public key
+    balance Decimal? @db.Decimal
+    nonce   Decimal? @db.Decimal
+    input   input[]
+    output  output[]
 }
 
 model btcTransaction {
@@ -51,6 +42,7 @@ model input {
     amount    Decimal?        @db.Decimal
     txId      String?
     type      String?
+    timeStamp Decimal?        @db.Decimal
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     wallet    btcWallet?      @relation(fields: [publicKey], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -61,6 +53,7 @@ model output {
     amount    Decimal?        @db.Decimal
     txId      String?
     type      String?
+    timeStamp Decimal?        @db.Decimal
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     wallet    btcWallet?      @relation(fields: [publicKey], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -84,12 +77,12 @@ model ethTransaction {
 }
 
 model evmWallet {
-    id                 String           @unique //ID is public key
-    balance            Decimal?         @db.Decimal
-    nonce              Decimal?         @db.Decimal
+    id                 String              @unique //ID is public key
+    balance            Decimal?            @db.Decimal
+    nonce              Decimal?            @db.Decimal
     balances           balanceHistoryEth[]
-    transactionFromEth ethTransaction[] @relation(name: "fromwallet")
-    transactionToEth   ethTransaction[] @relation(name: "towallet")
+    transactionFromEth ethTransaction[]    @relation(name: "fromwallet")
+    transactionToEth   ethTransaction[]    @relation(name: "towallet")
 }
 
 model shrimpwatch {
