@@ -186,9 +186,8 @@ export class DBHandler {
                 let oldNonce = parseInt(results[r].nonce)
                 let newBalance = oldBalance - sender.value
 
-                if (newBalance < 0) {
-                    this.delay(10000)
-                }
+                if (newBalance < 0) { newBalance = 0 } //because gas somtimes newBalance = -0.0000000000000000000000000000000000021 or similar
+
                 const pkg = {
                     id: sender.address.toLowerCase(),
                     balance: newBalance,
@@ -376,47 +375,4 @@ export class DBHandler {
             }).catch((e) => { })
         }
     }
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
 }
-
-// function trashboat() {
-//     const outPutResults = await this.prisma.output.findMany({
-//         where: {
-//             publicKey: receiver.address.toLowerCase(),
-//             timeStamp: {
-//                 lte: parseFloat(block.time)
-//             }
-//         }
-//     })
-//     let outputAmounts = 0
-//     for (let o = 0; o < outPutResults.length; o++) { outputAmounts += outPutResults[o].amount }
-
-//     const inPutResults = await this.prisma.input.findMany({
-//         where: {
-//             publicKey: receiver.address.toLowerCase(),
-//             timeStamp: {
-//                 lte: parseFloat(block.time)
-//             }
-//         }
-//     })
-//     let inputAmounts = 0
-//     for (let l = 0; l < inPutResults.length; l++) { inputAmounts += inPutResults[l].amount }
-
-//     let newBalance = 0
-//     if (inputAmounts == 0) {
-//         newBalance = outputAmounts
-//     } else {
-//         newBalance = outputAmounts - inputAmounts
-//     }
-
-//     await this.prisma.balanceHistoryBtc.create({
-//         data: {
-//             id: md5(`${transaction.txid}${receiver.address.toLowerCase()}${receiver.index}`),
-//             walletId: receiver.address.toLowerCase(),
-//             balance: newBalance,
-//             timeStamp: parseFloat(block.time),
-//         }
-//     }).catch((e) => { })
-// }

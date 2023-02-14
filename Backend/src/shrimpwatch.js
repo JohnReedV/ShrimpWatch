@@ -11,15 +11,12 @@ class ShrimpWatch {
         let numWorkers = Math.round(this.conf.workerPoolSize)
 
         if (this.conf.btcOn && this.conf.ethOn) {
-            if (numWorkers % 2 !== 0) {
-                numWorkers = (numWorkers - 1) / 2
-                console.log(`Number of workers is not divisible by 2, using ${numWorkers} workers for each blockchain`)
-            } else { numWorkers = numWorkers / 2 }
+            numWorkers = numWorkers -= 1
 
-            this.computeBtc(numWorkers)
+            this.computeBtc(1)
             this.computeEth(numWorkers)
         } else if (this.conf.btcOn) {
-            this.computeBtc(numWorkers)
+            this.computeBtc(1)
         } else if (this.conf.ethOn) {
             this.computeEth(numWorkers)
         } else { console.log('uhhh turn something on dude')}
