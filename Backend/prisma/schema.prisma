@@ -45,6 +45,9 @@ model input {
     timeStamp Decimal?        @db.Decimal
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     wallet    btcWallet?      @relation(fields: [publicKey], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+    @@index([publicKey])
+    @@index([timeStamp])
 }
 
 model output {
@@ -56,6 +59,9 @@ model output {
     timeStamp Decimal?        @db.Decimal
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     wallet    btcWallet?      @relation(fields: [publicKey], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+    @@index([publicKey])
+    @@index([timeStamp])
 }
 
 model ethTransaction {
