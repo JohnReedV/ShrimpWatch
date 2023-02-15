@@ -6,4 +6,4 @@ ShrimpWatch is a powerful platform that provides insightful analysis of Bitcoin 
 
 
 ### licence
-You cannot own information https://unlicense.org/
+https://unlicense.org/
