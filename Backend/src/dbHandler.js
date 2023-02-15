@@ -186,7 +186,7 @@ export class DBHandler {
                 let oldNonce = parseInt(results[r].nonce)
                 let newBalance = oldBalance - sender.value
 
-                if (newBalance < 0) { newBalance = 0 } //because gas somtimes newBalance = -0.0000000000000000000000000000000000021 or similar
+                if (newBalance < 0 && newBalance > -.1) { newBalance = 0 }
 
                 const pkg = {
                     id: sender.address.toLowerCase(),
