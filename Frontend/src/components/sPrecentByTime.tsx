@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
 const shrimpAmountTimeStampQuery = (timeStamp: number) => {
   return axiosInstance.post('', {
     query: `
-      query MyQuery${timeStamp} {
+      query MyQuery {
         allBtcWallets {
           edges {
             node {
@@ -49,7 +49,7 @@ const walletAmountQuery = () => {
   }).then(({ data }) => data.data.allBtcWallets.totalCount)
 }
 
-export const GetshrimpPercent = ({ shrimpData, walletAmount }: { shrimpData: any[], walletAmount: number }): number => {
+export const getshrimpPercent = ({ shrimpData, walletAmount }: { shrimpData: any[], walletAmount: number }): number => {
 
   let shrimpCount = 0
 
@@ -72,42 +72,58 @@ export const GetshrimpPercent = ({ shrimpData, walletAmount }: { shrimpData: any
 
 export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX.Element => {
   const queryClient = useQueryClient()
-  const [shrimpData, setShrimpData] = useState<any[]>([])
+  const [chartData, setChartData] = useState<{ date: Date, value: number }[]>([])
   const [walletAmount, setWalletAmount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
 
-  useEffect(() => {
-    const fetchShrimpData = async () => {
-      try {
-        const shrimpData = await shrimpAmountTimeStampQuery(timeStamp)
-        setShrimpData(shrimpData)
-      } catch (error) {
-        console.error(error)
-        setError(true)
-      }
+  const fetchShrimpData = async ({ dayTimeStamp }: { dayTimeStamp: number }) => {
+    try {
+      const shrimpData = await shrimpAmountTimeStampQuery(dayTimeStamp)
+      return shrimpData
+    } catch (error) {
+      console.error(error)
+      throw error
     }
-
-    const fetchWalletAmount = async () => {
-      try {
-        const walletAmount = await walletAmountQuery()
-        setWalletAmount(walletAmount)
-      } catch (error) {
-        console.error(error)
-        setError(true)
-      }
-    }
-
-    Promise.all([fetchShrimpData(), fetchWalletAmount()])
-      .then(() => setIsLoading(false))
-  }, [timeStamp, queryClient])
-
-  const data: { date: Date, value: number }[] = []
-  for (let i = 0; i < 30; i++) {
-    const dayTimeStamp = timeStamp - (i * 86400000)
-    const shrimpPercent = GetshrimpPercent({ shrimpData, walletAmount })
-    if (shrimpPercent > 0) { data.push({ date: new Date(dayTimeStamp), value: shrimpPercent }) }
   }
+
+  const fetchAllShrimpData = async () => {
+    try {
+      const promises = timeStamps.map((dayTimeStamp) => fetchShrimpData({ dayTimeStamp }))
+      const results = await Promise.all(promises)
+      const data = []
+      for (let i = 0; i < results.length; i++) {
+        const shrimpPercent = getshrimpPercent({ shrimpData: results[i], walletAmount: walletAmount })
+        console.log(shrimpPercent)
+        if (shrimpPercent > 0) { data.push({ date: new Date(timeStamps[i]), value: shrimpPercent }) }
+      }
+      setChartData(data)
+      setIsLoading(false)
+    } catch (error) {
+      console.error(error)
+      setError(true)
+    }
+  }
+
+  const fetchWalletAmount = async () => {
+    try {
+      const walletAmount = await walletAmountQuery()
+      setWalletAmount(walletAmount)
+    } catch (error) {
+      console.error(error)
+      setError(true)
+    }
+  }
+
+  const timeStamps: number[] = []
+  for (let i = 0; i < 30; i++) {
+    timeStamps.push(timeStamp - (i * 86400000))
+  }
+
+  useEffect(() => {
+    fetchWalletAmount()
+    fetchAllShrimpData()
+  }, [])
 
   const chartRef = useRef<HTMLDivElement>(null)
   const [chartInitialized, setChartInitialized] = useState(false)
@@ -117,7 +133,7 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
     const width = 800 - margin.left - margin.right
     const height = 500 - margin.top - margin.bottom
 
-    if (chartRef.current && data && !chartInitialized) {
+    if (chartRef.current && chartData.length > 0 && !chartInitialized) {
       const svg = d3.select(chartRef.current)
         .append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -139,7 +155,6 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
       const yScale = d3.scaleLinear()
         .domain([0, 100])
         .range([height, 0])
-
       svg.append('g')
         .call(d3.axisLeft(yScale).tickSizeOuter(0).tickPadding(10).ticks(5))
         .attr('font-size', '14px')
@@ -150,8 +165,7 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
 
       setChartInitialized(true)
     }
-    else if (chartRef.current && data.length > 0) {
-
+    else if (chartRef.current && chartData.length > 0) {
       const svg = d3.select(chartRef.current).select("g")
 
       const xScale = d3.scaleTime()
@@ -172,7 +186,7 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
         .y1((d) => yScale(d.value))
 
       const svgLine = svg.select('.line')
-        .datum(data)
+        .datum(chartData)
 
       svgLine.enter()
         .append("path")
@@ -182,7 +196,7 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
         .attr('d', line)
 
       const svgArea = svg.select('.area')
-        .datum(data)
+        .datum(chartData)
 
       svgArea.enter()
         .append("path")
@@ -195,7 +209,7 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
         .call(d3.axisLeft(yScale).tickSizeOuter(0).tickPadding(10).ticks(5))
 
       const dots = svg.selectAll(".dot")
-        .data(data)
+        .data(chartData)
 
       dots.enter()
         .append("circle")
@@ -230,7 +244,7 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
       dots.select("title")
         .text((d) => `${d.value}%`)
     }
-  }, [chartRef, data, chartInitialized, timeStamp])
+  }, [chartRef, chartData, chartInitialized, timeStamp])
 
   return (
     <>
