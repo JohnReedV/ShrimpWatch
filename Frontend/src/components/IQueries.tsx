@@ -10,3 +10,36 @@ export type BitcoinTransaction = {
     gas: string,
     coinbase: string
 }
+
+interface BtcWallet {
+    node: {
+        outputsByPublicKey: {
+            edges: {
+                node: {
+                    amount: number,
+                    timeStamp: number
+                }
+            }[]
+        }
+        inputsByPublicKey: {
+            edges: {
+                node: {
+                    amount: number,
+                    timeStamp: number
+                }
+            }[]
+        }
+    }
+}
+
+export interface AllBtcWalletsQueryResult {
+    allBtcWallets: {
+        edges: BtcWallet[]
+        totalCount: number
+    }
+}
+
+export interface ShrimpPercentage {
+    date: Date
+    percentage: number
+  }

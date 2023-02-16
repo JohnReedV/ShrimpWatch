@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, MouseEvent } from 'react'
-import { useQueryClient } from 'react-query'
+import { AllBtcWalletsQueryResult, ShrimpPercentage } from './IQueries'
 import axios from 'axios'
 import '../styles/Loading.css'
 import * as d3 from "d3"
@@ -8,33 +8,40 @@ const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000/graphql'
 })
 
-const shrimpAmountTimeStampQuery = (timeStamp: number) => {
+const shrimpAmountTimeStampQuery = (greatTimeStamp: number, smallTimeStamp: number): Promise<AllBtcWalletsQueryResult> => {
   return axiosInstance.post('', {
     query: `
-      query MyQuery {
-        allBtcWallets {
-          edges {
-            node {
-              outputsByPublicKey(filter: {timeStamp: {lessThanOrEqualTo: "${timeStamp}"}}) {
-                edges {
-                  node {
-                    amount
-                  }
+    query MyQuery {
+      allBtcWallets {
+        edges {
+          node {
+            outputsByPublicKey(
+              filter: {timeStamp: {lessThanOrEqualTo: "${greatTimeStamp}", greaterThanOrEqualTo: "${smallTimeStamp}"}}
+            ) {
+              edges {
+                node {
+                  amount
+                  timeStamp
                 }
               }
-              inputsByPublicKey(filter: {timeStamp: {lessThanOrEqualTo: "${timeStamp}"}}) {
-                edges {
-                  node {
-                    amount
-                  }
+            }
+            inputsByPublicKey(
+              filter: {timeStamp: {lessThanOrEqualTo: "${greatTimeStamp}", greaterThanOrEqualTo: "${smallTimeStamp}"}}
+            ) {
+              edges {
+                node {
+                  amount
+                  timeStamp
                 }
               }
             }
           }
         }
-      }      
+        totalCount
+      }
+    }
     `,
-  }).then(({ data }) => data.data.allBtcWallets.edges)
+  }).then(({ data }) => data.data as AllBtcWalletsQueryResult)
 }
 
 const walletAmountQuery = () => {
@@ -49,37 +56,71 @@ const walletAmountQuery = () => {
   }).then(({ data }) => data.data.allBtcWallets.totalCount)
 }
 
-export const getshrimpPercent = ({ shrimpData, walletAmount }: { shrimpData: any[], walletAmount: number }): number => {
+const getshrimpPercent = (data: AllBtcWalletsQueryResult, walletAmount: number): ShrimpPercentage[] => {
+  const shrimpData = data.allBtcWallets.edges
+  const shrimpPercentages: ShrimpPercentage[] = []
 
-  let shrimpCount = 0
+  let latestTimestamp = 0;
+  shrimpData.forEach(({ node: { inputsByPublicKey } }) => {
+    inputsByPublicKey.edges.forEach(({ node }) => {
+      if (node.timeStamp > latestTimestamp) {
+        latestTimestamp = node.timeStamp
+      }
+    })
+  })
 
-  for (let i = 0; i < shrimpData.length; i++) {
-    const outputs = shrimpData[i].node.outputsByPublicKey.edges
-    const inputs = shrimpData[i].node.inputsByPublicKey.edges
+  const dayInMilliseconds = 86400000
 
-    let outputAmount = 0
-    let inputAmount = 0
-    for (let o = 0; o < outputs.length; o++) { outputAmount += outputs[o]?.node?.amount || 0 }
-    for (let a = 0; a < inputs.length; a++) { inputAmount += inputs[a]?.node?.amount || 0 }
+  for (let i = 1; i <= 30; i++) {
+    const dayTimestamp = latestTimestamp - (i * dayInMilliseconds);
+    const shrimpCount = shrimpData.reduce((count, { node: { inputsByPublicKey, outputsByPublicKey } }) => {
+      const outputs = outputsByPublicKey.edges
+      const inputs = inputsByPublicKey.edges
+      let outputAmount = 0
+      let inputAmount = 0
 
-    const BALANCE_AT_TIMESTAMP = outputAmount - inputAmount
+      for (let o = 0; o < outputs.length; o++) {
+        outputAmount += outputs[o]?.node?.amount || 0
+      }
 
-    if (BALANCE_AT_TIMESTAMP < 1) { shrimpCount += 1 }
+      for (let a = 0; a < inputs.length; a++) {
+        const input = inputs[a].node;
+        if (input.timeStamp <= dayTimestamp) {
+          inputAmount += input?.amount || 0
+        }
+      }
+
+      const BALANCE_AT_TIMESTAMP = outputAmount - inputAmount
+
+      if (BALANCE_AT_TIMESTAMP < 1) {
+        count += 1
+      }
+
+      return count
+    }, 0)
+
+    const shrimpPercent = (shrimpCount / walletAmount) * 100
+    shrimpPercentages.push({ date: new Date(dayTimestamp), percentage: shrimpPercent })
   }
-  const shrimpPercent = (shrimpCount / walletAmount) * 100
-  return shrimpPercent
+  console.log(shrimpPercentages)
+  return shrimpPercentages
 }
 
+
 export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX.Element => {
-  const queryClient = useQueryClient()
-  const [chartData, setChartData] = useState<{ date: Date, value: number }[]>([])
+  const [chartData, setChartData] = useState<ShrimpPercentage[]>([])
   const [walletAmount, setWalletAmount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
+  const timeStamps: number[] = []
 
-  const fetchShrimpData = async ({ dayTimeStamp }: { dayTimeStamp: number }) => {
+  for (let i = 0; i < 30; i++) {
+    timeStamps.push(timeStamp - (i * 86400000))
+  }
+
+  const fetchShrimpData = async (dayTimeStamp: number, timeStamp: number) => {
     try {
-      const shrimpData = await shrimpAmountTimeStampQuery(dayTimeStamp)
+      const shrimpData = await shrimpAmountTimeStampQuery(timeStamp, dayTimeStamp)
       return shrimpData
     } catch (error) {
       console.error(error)
@@ -88,21 +129,14 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
   }
 
   const fetchAllShrimpData = async () => {
-    try {
-      const promises = timeStamps.map((dayTimeStamp) => fetchShrimpData({ dayTimeStamp }))
-      const results = await Promise.all(promises)
-      const data = []
-      for (let i = 0; i < results.length; i++) {
-        const shrimpPercent = getshrimpPercent({ shrimpData: results[i], walletAmount: walletAmount })
-        console.log(shrimpPercent)
-        if (shrimpPercent > 0) { data.push({ date: new Date(timeStamps[i]), value: shrimpPercent }) }
-      }
-      setChartData(data)
-      setIsLoading(false)
-    } catch (error) {
-      console.error(error)
-      setError(true)
-    }
+    const greatestTimeStamp = Math.max(...timeStamps);
+    const walletAmountResult = await walletAmountQuery();
+    setWalletAmount(walletAmountResult);
+    const results = await fetchShrimpData(greatestTimeStamp, timeStamp);
+    const data = getshrimpPercent(results, walletAmountResult);
+  
+    setChartData(data)
+    setIsLoading(false)
   }
 
   const fetchWalletAmount = async () => {
@@ -115,14 +149,8 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
     }
   }
 
-  const timeStamps: number[] = []
-  for (let i = 0; i < 30; i++) {
-    timeStamps.push(timeStamp - (i * 86400000))
-  }
-
   useEffect(() => {
-    fetchWalletAmount()
-    fetchAllShrimpData()
+    fetchWalletAmount().then(() => fetchAllShrimpData())
   }, [])
 
   const chartRef = useRef<HTMLDivElement>(null)
@@ -176,14 +204,14 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
         .domain([0, 100])
         .range([height, 0])
 
-      const line = d3.line<{ date: Date, value: number }>()
+      const line = d3.line<ShrimpPercentage>()
         .x((d) => xScale(d.date))
-        .y((d) => yScale(d.value))
+        .y((d) => yScale(d.percentage))
 
-      const area = d3.area<{ date: Date, value: number }>()
+      const area = d3.area<ShrimpPercentage>()
         .x((d) => xScale(d.date))
         .y0(height)
-        .y1((d) => yScale(d.value))
+        .y1((d) => yScale(d.percentage))
 
       const svgLine = svg.select('.line')
         .datum(chartData)
@@ -216,12 +244,12 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
         .merge(dots)
         .attr("class", "dot")
         .attr("cx", (d) => xScale(d.date))
-        .attr("cy", (d) => yScale(d.value))
+        .attr("cy", (d) => yScale(d.percentage))
         .attr("r", 5)
         .attr("fill", "#4F8AD6")
         .attr("stroke", "#fff")
         .attr("stroke-width", 2)
-        .attr("data-value", (d) => d.value)
+        .attr("data-value", (d) => d.percentage)
         .on("mouseover", function (d) {
           const event = d3.event as MouseEvent
           const date = d.date ? d.date.toLocaleDateString() : ''
@@ -239,10 +267,10 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
       dots.exit().remove()
 
       dots.append("title")
-        .text((d) => `${d.value}%`)
+        .text((d) => `${d.percentage}%`)
 
       dots.select("title")
-        .text((d) => `${d.value}%`)
+        .text((d) => `${d.percentage}%`)
     }
   }, [chartRef, chartData, chartInitialized, timeStamp])
 
