@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, MouseEvent } from 'react'
-import { AllBtcWalletsQueryResult, ShrimpPercentage } from './IQueries'
+import { ShrimpPercentage } from './IQueries'
 import axios from 'axios'
 import '../styles/Loading.css'
 import * as d3 from "d3"
@@ -8,7 +8,10 @@ const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000/graphql'
 })
 
-const shrimpAmountTimeStampQuery = (greatTimeStamp: number, smallTimeStamp: number): Promise<AllBtcWalletsQueryResult> => {
+const getShrimpPercentage = (timeStamps: number[]): Promise<ShrimpPercentage[]> => {
+  const greatTimeStamp = Math.max(...timeStamps)
+  const smallTimeStamp = Math.min(...timeStamps)
+
   return axiosInstance.post('', {
     query: `
     query MyQuery {
@@ -41,116 +44,61 @@ const shrimpAmountTimeStampQuery = (greatTimeStamp: number, smallTimeStamp: numb
       }
     }
     `,
-  }).then(({ data }) => data.data as AllBtcWalletsQueryResult)
-}
+  }).then(({ data }) => {
+    const shrimpData = data.data.allBtcWallets.edges
+    const shrimpPercentages: ShrimpPercentage[] = []
 
-const walletAmountQuery = () => {
-  return axiosInstance.post('', {
-    query: `
-      query anotherQ {
-        allBtcWallets {
-          totalCount
+    let latestTimestamp = 0
+    shrimpData.forEach(({ node: { inputsByPublicKey } }) => {
+      inputsByPublicKey.edges.forEach(({ node }) => {
+        if (node.timeStamp > latestTimestamp) {
+          latestTimestamp = node.timeStamp
         }
-      }
-    `,
-  }).then(({ data }) => data.data.allBtcWallets.totalCount)
-}
-
-const getshrimpPercent = (data: AllBtcWalletsQueryResult, walletAmount: number): ShrimpPercentage[] => {
-  const shrimpData = data.allBtcWallets.edges
-  const shrimpPercentages: ShrimpPercentage[] = []
-
-  let latestTimestamp = 0;
-  shrimpData.forEach(({ node: { inputsByPublicKey } }) => {
-    inputsByPublicKey.edges.forEach(({ node }) => {
-      if (node.timeStamp > latestTimestamp) {
-        latestTimestamp = node.timeStamp
-      }
+      })
     })
-  })
 
-  const dayInMilliseconds = 86400000
+    const dayInMilliseconds = 86400000
 
-  for (let i = 1; i <= 30; i++) {
-    const dayTimestamp = latestTimestamp - (i * dayInMilliseconds);
-    const shrimpCount = shrimpData.reduce((count, { node: { inputsByPublicKey, outputsByPublicKey } }) => {
-      const outputs = outputsByPublicKey.edges
-      const inputs = inputsByPublicKey.edges
-      let outputAmount = 0
-      let inputAmount = 0
+    shrimpData.forEach(({ node: { outputsByPublicKey, inputsByPublicKey } }, index) => {
+      const dayTimestamp = latestTimestamp - dayInMilliseconds
 
-      for (let o = 0; o < outputs.length; o++) {
-        outputAmount += outputs[o]?.node?.amount || 0
-      }
-
-      for (let a = 0; a < inputs.length; a++) {
-        const input = inputs[a].node;
-        if (input.timeStamp <= dayTimestamp) {
-          inputAmount += input?.amount || 0
+      const shrimpWallets = outputsByPublicKey.edges.concat(inputsByPublicKey.edges).reduce((count, { node }) => {
+        if (node.timeStamp >= dayTimestamp && node.timeStamp <= latestTimestamp && node.amount > 0) {
+          count += 1
         }
-      }
+        return count
+      }, 0)
 
-      const BALANCE_AT_TIMESTAMP = outputAmount - inputAmount
+      const totalWallets = outputsByPublicKey.edges.length + inputsByPublicKey.edges.length
+      const shrimpPercent = (shrimpWallets / totalWallets) * 100
+      shrimpPercentages.push({ date: new Date(dayTimestamp), percentage: shrimpPercent })
+      latestTimestamp = dayTimestamp
+    })
 
-      if (BALANCE_AT_TIMESTAMP < 1) {
-        count += 1
-      }
-
-      return count
-    }, 0)
-
-    const shrimpPercent = (shrimpCount / walletAmount) * 100
-    shrimpPercentages.push({ date: new Date(dayTimestamp), percentage: shrimpPercent })
-  }
-  console.log(shrimpPercentages)
-  return shrimpPercentages
+    console.log(shrimpPercentages)
+    return shrimpPercentages
+  })
 }
+
 
 
 export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX.Element => {
   const [chartData, setChartData] = useState<ShrimpPercentage[]>([])
-  const [walletAmount, setWalletAmount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
   const timeStamps: number[] = []
 
-  for (let i = 0; i < 30; i++) {
-    timeStamps.push(timeStamp - (i * 86400000))
-  }
-
-  const fetchShrimpData = async (dayTimeStamp: number, timeStamp: number) => {
-    try {
-      const shrimpData = await shrimpAmountTimeStampQuery(timeStamp, dayTimeStamp)
-      return shrimpData
-    } catch (error) {
-      console.error(error)
-      throw error
-    }
-  }
 
   const fetchAllShrimpData = async () => {
-    const greatestTimeStamp = Math.max(...timeStamps);
-    const walletAmountResult = await walletAmountQuery();
-    setWalletAmount(walletAmountResult);
-    const results = await fetchShrimpData(greatestTimeStamp, timeStamp);
-    const data = getshrimpPercent(results, walletAmountResult);
-  
+    for (let i = 0; i < 30; i++) { timeStamps.push(timeStamp - (i * 86400000)) }
+    const data = await getShrimpPercentage(timeStamps)
+
     setChartData(data)
     setIsLoading(false)
   }
 
-  const fetchWalletAmount = async () => {
-    try {
-      const walletAmount = await walletAmountQuery()
-      setWalletAmount(walletAmount)
-    } catch (error) {
-      console.error(error)
-      setError(true)
-    }
-  }
-
   useEffect(() => {
-    fetchWalletAmount().then(() => fetchAllShrimpData())
+    fetchAllShrimpData()
   }, [])
 
   const chartRef = useRef<HTMLDivElement>(null)
@@ -255,7 +203,7 @@ export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX
           const date = d.date ? d.date.toLocaleDateString() : ''
           const tooltip = d3.select('#tooltip')
           tooltip.style("opacity", 1)
-            .html(`Doggy Percent: ${d.value}%<br/>Date: ${date}`)
+            .html(`Shrimp Percent: ${d.value}%<br/>Date: ${date}`)
             .style("left", `${event?.pageX + 10}px`)
             .style("top", `${event?.pageY - 10}px`)
         })
