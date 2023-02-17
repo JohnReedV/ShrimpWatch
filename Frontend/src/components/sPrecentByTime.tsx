@@ -59,21 +59,27 @@ const getShrimpPercentage = (timeStamps: number[]): Promise<ShrimpPercentage[]> 
 
     const dayInMilliseconds = 86400000
 
-    shrimpData.forEach(({ node: { outputsByPublicKey, inputsByPublicKey } }, index) => {
+    let shrimpCount = 0
+    for (let i = 0; i < shrimpData.length; i++) {
+      const outputs = shrimpData[i].node.outputsByPublicKey.edges
+      const inputs = shrimpData[i].node.inputsByPublicKey.edges
+  
+      let outputAmount = 0
+      let inputAmount = 0
+      for (let o = 0; o < outputs.length; o++) { outputAmount += outputs[o]?.node?.amount || 0 }
+      for (let a = 0; a < inputs.length; a++) { inputAmount += inputs[a]?.node?.amount || 0 }
+  
+      const BALANCE_AT_TIMESTAMP = outputAmount - inputAmount
+  
+      if (BALANCE_AT_TIMESTAMP < 1) { shrimpCount += 1 }
+
       const dayTimestamp = latestTimestamp - dayInMilliseconds
 
-      const shrimpWallets = outputsByPublicKey.edges.concat(inputsByPublicKey.edges).reduce((count, { node }) => {
-        if (node.timeStamp >= dayTimestamp && node.timeStamp <= latestTimestamp && node.amount > 0) {
-          count += 1
-        }
-        return count
-      }, 0)
-
-      const totalWallets = outputsByPublicKey.edges.length + inputsByPublicKey.edges.length
-      const shrimpPercent = (shrimpWallets / totalWallets) * 100
+      const totalWallets = outputs.length + inputs.length
+      const shrimpPercent = (shrimpCount / totalWallets) * 100
       shrimpPercentages.push({ date: new Date(dayTimestamp), percentage: shrimpPercent })
       latestTimestamp = dayTimestamp
-    })
+    }
 
     console.log(shrimpPercentages)
     return shrimpPercentages
