@@ -16,8 +16,6 @@ const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => 
   timeStamps.push(timeStamp)
 
   const greatTimeStamp = Math.max(...timeStamps)
-  const smallTimeStamp = Math.min(...timeStamps)
-
   const shrimps: ShrimpPercentage[] = new Array(30).fill({ timestamp: 0, percentage: 0 })
 
   return axiosInstance.post('', {
@@ -28,7 +26,7 @@ const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => 
             node {
               id
               outputsByPublicKey(
-                filter: { timeStamp: { greaterThanOrEqualTo: "${smallTimeStamp}", lessThanOrEqualTo: "${greatTimeStamp}" } }
+                filter: { timeStamp: { lessThanOrEqualTo: "${greatTimeStamp}" } }
               ) {
                 edges {
                   node {
@@ -38,7 +36,7 @@ const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => 
                 }
               }
               inputsByPublicKey(
-                filter: { timeStamp: { greaterThanOrEqualTo: "${smallTimeStamp}", lessThanOrEqualTo: "${greatTimeStamp}" } }
+                filter: { timeStamp: { lessThanOrEqualTo: "${greatTimeStamp}" } }
               ) {
                 edges {
                   node {
