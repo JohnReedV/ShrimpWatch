@@ -9,15 +9,15 @@ const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000/graphql'
 })
 
-const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => {
+const getShrimpPercentage = (timeStamp: number, dates: number): Promise<ShrimpPercentage[]> => {
   const timeStamps: number[] = []
-  for (let i = 0; i < 29; i++) {
+  for (let i = 0; i < (dates - 1); i++) {
     timeStamps.push(timeStamp + i * 86400)
   }
   timeStamps.push(timeStamp)
 
   const greatTimeStamp = Math.max(...timeStamps)
-  const shrimps: ShrimpPercentage[] = new Array(30).fill({ timestamp: 0, percentage: 0 })
+  const shrimps: ShrimpPercentage[] = new Array(dates).fill({ timestamp: 0, percentage: 0 })
 
   return axiosInstance.post('', {
     query: `
@@ -99,19 +99,18 @@ const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => 
           percentage: parseFloat(percentage.toFixed(2)),
         }
       }
-      console.log(shrimps)
       return shrimps
     })
 }
 
-export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX.Element => {
+export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number, dates: number }): JSX.Element => {
   const [chartData, setChartData] = useState<ChartData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
 
   const fetchAllShrimpData = async () => {
     try {
-      const data: ShrimpPercentage[] = await getShrimpPercentage(timeStamp)
+      const data: ShrimpPercentage[] = await getShrimpPercentage(timeStamp, dates)
       const chartData: ChartData[] = data.map((item) => ({
         x: item.timestamp * 1000,
         y: item.percentage,
