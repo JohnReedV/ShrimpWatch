@@ -10,9 +10,9 @@ const axiosInstance = axios.create({
 })
 
 const getShrimpPercentage = async (timeStamp: number, dates: number): Promise<ShrimpPercentage[]> => {
-  const timeStamps: number[] = Array.from({ length: dates }, (_, i) => timeStamp + i * 86400)
-  const greatTimeStamp = Math.max(...timeStamps)
+  const timeStamps: number[] = Array.from({ length: dates }, (_, i) => timeStamp - (dates - i - 1) * 86400)
   const shrimps: ShrimpPercentage[] = Array.from({ length: dates }, () => ({ timestamp: 0, percentage: 0 }))
+  const greatTimeStamp = Math.max(...timeStamps)
 
   const { data } = await axiosInstance.post('', {
     query: `
