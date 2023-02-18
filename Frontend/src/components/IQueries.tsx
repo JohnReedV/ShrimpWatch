@@ -12,7 +12,6 @@ export type BitcoinTransaction = {
 }
 
 export interface ShrimpPercentage {
-    date: Date
+    timestamp: number,
     percentage: number
 }
-
