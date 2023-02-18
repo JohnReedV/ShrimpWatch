@@ -67,14 +67,14 @@ const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => 
           const outputs = node.node.outputsByPublicKey.edges
           const inputs = node.node.inputsByPublicKey.edges
 
-          if (inputs.length <= 0 && outputs.length <= 0 ) { continue }
+          if (inputs.length <= 0 && outputs.length <= 0) { continue }
 
           let outputAmount = 0
           let inputAmount = 0
 
           for (let o = 0; o < outputs.length; o++) {
             const output = outputs[o].node
-            if (output && output.timeStamp >= dayTimeStamp && output.timeStamp < dayTimeStamp + 86400) {
+            if (output && output.timeStamp <= dayTimeStamp) {
               outputAmount += output.amount
               wallets.add(address)
             }
@@ -82,7 +82,7 @@ const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => 
 
           for (let a = 0; a < inputs.length; a++) {
             const input = inputs[a].node
-            if (input && input.timeStamp >= dayTimeStamp && input.timeStamp < dayTimeStamp + 86400) {
+            if (input && input.timeStamp <= dayTimeStamp) {
               inputAmount += input.amount
               wallets.add(address)
             }
@@ -100,6 +100,7 @@ const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => 
           percentage: parseFloat(percentage.toFixed(2)),
         }
       }
+      console.log(shrimps)
       return shrimps
     })
 }
