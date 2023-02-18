@@ -9,26 +9,19 @@ const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000/graphql'
 })
 
-const getShrimpPercentage = (timeStamp: number, dates: number): Promise<ShrimpPercentage[]> => {
-  const timeStamps: number[] = []
-  for (let i = 0; i < (dates - 1); i++) {
-    timeStamps.push(timeStamp + i * 86400)
-  }
-  timeStamps.push(timeStamp)
-
+const getShrimpPercentage = async (timeStamp: number, dates: number): Promise<ShrimpPercentage[]> => {
+  const timeStamps: number[] = Array.from({ length: dates }, (_, i) => timeStamp + i * 86400)
   const greatTimeStamp = Math.max(...timeStamps)
-  const shrimps: ShrimpPercentage[] = new Array(dates).fill({ timestamp: 0, percentage: 0 })
+  const shrimps: ShrimpPercentage[] = Array.from({ length: dates }, () => ({ timestamp: 0, percentage: 0 }))
 
-  return axiosInstance.post('', {
+  const { data } = await axiosInstance.post('', {
     query: `
       query MyQuery {
         allBtcWallets {
           edges {
             node {
               id
-              outputsByPublicKey(
-                filter: { timeStamp: { lessThanOrEqualTo: "${greatTimeStamp}" } }
-              ) {
+              outputsByPublicKey(filter: { timeStamp: { lessThanOrEqualTo: "${greatTimeStamp}" } }) {
                 edges {
                   node {
                     amount
@@ -36,9 +29,7 @@ const getShrimpPercentage = (timeStamp: number, dates: number): Promise<ShrimpPe
                   }
                 }
               }
-              inputsByPublicKey(
-                filter: { timeStamp: { lessThanOrEqualTo: "${greatTimeStamp}" } }
-              ) {
+              inputsByPublicKey(filter: { timeStamp: { lessThanOrEqualTo: "${greatTimeStamp}" } }) {
                 edges {
                   node {
                     amount
@@ -52,55 +43,54 @@ const getShrimpPercentage = (timeStamp: number, dates: number): Promise<ShrimpPe
       }
     `,
   })
-    .then(({ data }) => {
-      const edges = data.data.allBtcWallets.edges
 
-      for (let i = 0; i < timeStamps.length; i++) {
+  const edges = data?.data?.allBtcWallets?.edges ?? []
 
-        const dayTimeStamp = timeStamps[i]
-        let wallets: Set<string> = new Set()
-        let walletsWithBalanceLessThanOne = 0
+  for (let i = 0; i < timeStamps.length; i++) {
+    const dayTimeStamp = timeStamps[i]
+    let wallets = new Set<string>()
+    let walletsWithBalanceLessThanOne = 0
 
-        for (let node of edges) {
-          const address = node.node.id
-          const outputs = node.node.outputsByPublicKey.edges
-          const inputs = node.node.inputsByPublicKey.edges
+    for (let { node } of edges) {
+      const { id, outputsByPublicKey, inputsByPublicKey } = node
 
-          if (inputs.length <= 0 && outputs.length <= 0) { continue }
+      if (!outputsByPublicKey || !inputsByPublicKey) { continue }
 
-          let outputAmount = 0
-          let inputAmount = 0
+      const outputs = outputsByPublicKey.edges
+      const inputs = inputsByPublicKey.edges
 
-          for (let o = 0; o < outputs.length; o++) {
-            const output = outputs[o].node
-            if (output && output.timeStamp <= dayTimeStamp) {
-              outputAmount += parseFloat(output.amount)
-              wallets.add(address)
-            }
-          }
+      if (inputs.length <= 0 && outputs.length <= 0) { continue }
 
-          for (let a = 0; a < inputs.length; a++) {
-            const input = inputs[a].node
-            if (input && input.timeStamp <= dayTimeStamp) {
-              inputAmount += parseFloat(input.amount)
-              wallets.add(address)
-            }
-          }
+      let outputAmount = 0
+      let inputAmount = 0
 
-          const balanceAmount = outputAmount - inputAmount
-          if (balanceAmount < 1 && balanceAmount > 0) {
-            walletsWithBalanceLessThanOne++
-          }
-        }
-        const totalWallets = wallets.size
-        const percentage = (totalWallets > 0) ? (walletsWithBalanceLessThanOne / totalWallets) * 100 : 0
-        shrimps[i] = {
-          timestamp: dayTimeStamp,
-          percentage: parseFloat(percentage.toFixed(2)),
+      for (let { node: output } of outputs) {
+        if (output.timeStamp <= dayTimeStamp) {
+          outputAmount += +output.amount
+          wallets.add(id)
         }
       }
-      return shrimps
-    })
+
+      for (let { node: input } of inputs) {
+        if (input.timeStamp <= dayTimeStamp) {
+          inputAmount += +input.amount
+          wallets.add(id)
+        }
+      }
+
+      const balanceAmount = outputAmount - inputAmount
+      if (balanceAmount > 0 && balanceAmount < 1) { walletsWithBalanceLessThanOne++ }
+    }
+
+    const totalWallets = wallets.size
+    const percentage = totalWallets > 0 ? (walletsWithBalanceLessThanOne / totalWallets) * 100 : 0
+    shrimps[i] = {
+      timestamp: dayTimeStamp,
+      percentage: +percentage.toFixed(2),
+    }
+  }
+  console.log(shrimps)
+  return shrimps
 }
 
 export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number, dates: number }): JSX.Element => {
