@@ -15,3 +15,8 @@ export interface ShrimpPercentage {
     timestamp: number,
     percentage: number
 }
+
+export interface ChartData {
+    x: number
+    y: number
+  }

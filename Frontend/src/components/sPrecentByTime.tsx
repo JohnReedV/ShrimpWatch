@@ -1,8 +1,9 @@
-import { useRef, useEffect, useState, MouseEvent } from 'react'
-import { ShrimpPercentage } from './IQueries'
+import { useRef, useEffect, useState } from 'react'
+import { ShrimpPercentage, ChartData } from './IQueries'
 import axios from 'axios'
+import Highcharts from 'highcharts'
+import HighchartsReact from 'highcharts-react-official'
 import '../styles/Loading.css'
-import * as d3 from "d3"
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000/graphql'
@@ -104,152 +105,125 @@ const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => 
 }
 
 export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX.Element => {
-  const [chartData, setChartData] = useState<ShrimpPercentage[]>([])
+  const [chartData, setChartData] = useState<ChartData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
 
   const fetchAllShrimpData = async () => {
-    const data: ShrimpPercentage[] = await getShrimpPercentage(timeStamp)
-
-    setChartData(data)
-    setIsLoading(false)
+    try {
+      const data: ShrimpPercentage[] = await getShrimpPercentage(timeStamp)
+      const chartData: ChartData[] = data.map((item) => ({
+        x: item.timestamp * 1000,
+        y: item.percentage,
+      }))
+      chartData[0].y = null
+      chartData[chartData.length - 1].y = null
+      setChartData(chartData)
+      setIsLoading(false)
+    } catch (err) {
+      setError(true)
+    }
   }
 
   useEffect(() => {
     fetchAllShrimpData()
   }, [])
 
-  const chartRef = useRef<HTMLDivElement>(null)
-  const [chartInitialized, setChartInitialized] = useState(false)
+  const chartRef = useRef<HighchartsReact>(null)
 
-  useEffect(() => {
-    const margin = { top: 50, right: 50, bottom: 50, left: 50 }
-    const width = 800 - margin.left - margin.right
-    const height = 500 - margin.top - margin.bottom
-
-    if (chartRef.current && chartData.length > 0 && !chartInitialized) {
-      const svg = d3.select(chartRef.current)
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", `translate(${margin.left}, ${margin.top})`)
-
-      svg.append("path")
-        .attr("class", "line")
-        .attr("fill", "none")
-        .attr("stroke", "#4F8AD6")
-        .attr("stroke-width", 2)
-
-      svg.append("path")
-        .attr("class", "area")
-        .attr("fill", "#4F8AD6")
-        .attr("opacity", 0.2)
-
-      const yScale = d3.scaleLinear()
-        .domain([0, 100])
-        .range([height, 0])
-      svg.append('g')
-        .call(d3.axisLeft(yScale).tickSizeOuter(0).tickPadding(10).ticks(5))
-        .attr('font-size', '14px')
-        .attr('font-family', 'sans-serif')
-        .attr('color', '#444444')
-        .select('.domain')
-        .remove()
-
-      setChartInitialized(true)
-    }
-    else if (chartRef.current && chartData.length > 0) {
-      const svg = d3.select(chartRef.current).select("g")
-
-      const xScale = d3.scaleTime()
-        .domain([new Date(timeStamp - 29 * 86400000), new Date(timeStamp)])
-        .range([0, width])
-
-      const yScale = d3.scaleLinear()
-        .domain([0, 100])
-        .range([height, 0])
-
-      const line = d3.line<ShrimpPercentage>()
-        .x((d) => xScale(d.date))
-        .y((d) => yScale(d.percentage))
-
-      const area = d3.area<ShrimpPercentage>()
-        .x((d) => xScale(d.date))
-        .y0(height)
-        .y1((d) => yScale(d.percentage))
-
-      const svgLine = svg.select('.line')
-        .datum(chartData)
-
-      svgLine.enter()
-        .append("path")
-        .merge(svgLine)
-        .transition()
-        .duration(1000)
-        .attr('d', line)
-
-      const svgArea = svg.select('.area')
-        .datum(chartData)
-
-      svgArea.enter()
-        .append("path")
-        .merge(svgArea)
-        .transition()
-        .duration(1000)
-        .attr('d', area)
-
-      const yAxis = svg.select('.y-axis')
-        .call(d3.axisLeft(yScale).tickSizeOuter(0).tickPadding(10).ticks(5))
-
-      const dots = svg.selectAll(".dot")
-        .data(chartData)
-
-      dots.enter()
-        .append("circle")
-        .merge(dots)
-        .attr("class", "dot")
-        .attr("cx", (d) => xScale(d.date))
-        .attr("cy", (d) => yScale(d.percentage))
-        .attr("r", 5)
-        .attr("fill", "#4F8AD6")
-        .attr("stroke", "#fff")
-        .attr("stroke-width", 2)
-        .attr("data-value", (d) => d.percentage)
-        .on("mouseover", function (d) {
-          const event = d3.event as MouseEvent
-          const date = d.date ? d.date.toLocaleDateString() : ''
-          const tooltip = d3.select('#tooltip')
-          tooltip.style("opacity", 1)
-            .html(`Shrimp Percent: ${d.value}%<br/>Date: ${date}`)
-            .style("left", `${event?.pageX + 10}px`)
-            .style("top", `${event?.pageY - 10}px`)
-        })
-        .on("mouseout", (d) => {
-          d3.select('#tooltip')
-            .style("opacity", 0)
-        })
-
-      dots.exit().remove()
-
-      dots.append("title")
-        .text((d) => `${d.percentage}%`)
-
-      dots.select("title")
-        .text((d) => `${d.percentage}%`)
-    }
-  }, [chartRef, chartData, chartInitialized, timeStamp])
-
+  const options: Highcharts.Options = {
+    chart: {
+      type: 'line',
+      backgroundColor: {
+        linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+        stops: [
+          [0, '#292E49'],
+          [1, '#536976'],
+        ],
+      },
+      borderRadius: 10,
+      style: {
+        fontFamily: 'Arial',
+      },
+      animation: true,
+    },
+    credits: { enabled: false },
+    title: {
+      text: 'Shrimp Percentage Chart',
+      style: {
+        color: '#fff',
+        fontWeight: 'bold',
+      },
+    },
+    xAxis: {
+      type: 'datetime',
+      labels: {
+        style: {
+          color: '#fff',
+        },
+      },
+    },
+    yAxis: {
+      title: {
+        text: 'Percentage',
+        style: {
+          color: '#fff',
+          fontWeight: 'bold',
+        },
+      },
+      labels: {
+        style: {
+          color: '#fff',
+        },
+        format: '{value}%'
+      },
+      gridLineColor: '#444',
+    },
+    legend: {
+      enabled: false,
+    },
+    tooltip: {
+      formatter: function () {
+        return '<b>' + Highcharts.dateFormat('%e %b %y', this.x) + '</b><br/>' +
+          this.series.name + ': ' + this.y + '%'
+      }
+    },
+    series: [
+      {
+        name: 'Shrimp Percentage',
+        data: chartData,
+        color: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [
+            [0, '#D4145A'],
+            [1, '#FBB03B']
+          ]
+        },
+        lineWidth: 3,
+        marker: {
+          symbol: 'circle',
+          radius: 5,
+          fillColor: '#000000',
+          lineWidth: 2,
+          lineColor: '#D4145A',
+          animation: true,
+        },
+        fillColor: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [
+            [0, 'rgba(212, 20, 90, 0.5)'],
+            [1, 'rgba(251, 176, 59, 0.5)']
+          ]
+        },
+      },
+    ],
+  }
   return (
     <>
       {isLoading && <Loading />}
       {error && <p>An error occurred</p>}
       {!isLoading && !error && (
-        <ul>
-          <li style={{ display: "flex", justifyContent: "center" }}>
-            <div ref={chartRef} style={{ maxWidth: "800px", margin: "0 auto" }}></div>
-          </li>
-        </ul>
+        <HighchartsReact highcharts={Highcharts} options={options} ref={chartRef} />
       )}
     </>
   )
