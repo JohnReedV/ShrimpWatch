@@ -9,10 +9,11 @@ const axiosInstance = axios.create({
 })
 
 const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => {
-  const timeStamps: number[] = [timeStamp]
+  const timeStamps: number[] = []
   for (let i = 0; i < 29; i++) {
-    timeStamps.push(timeStamp - i * 86400)
+    timeStamps.push(timeStamp + i * 86400)
   }
+  timeStamps.push(timeStamp)
 
   const greatTimeStamp = Math.max(...timeStamps)
   const smallTimeStamp = Math.min(...timeStamps)
@@ -54,18 +55,19 @@ const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => 
   })
     .then(({ data }) => {
       const edges = data.data.allBtcWallets.edges
-      console.log(edges.length)
-      for (let node of edges) {
-        console.log('in')
-        const address = node.node.id
-        const outputs = node.node.outputsByPublicKey.edges
-        const inputs = node.node.inputsByPublicKey.edges
 
-        if (inputs.length <= 0 && outputs.length <= 0 ) { continue }
-        const wallets: Set<string> = new Set()
+      for (let i = 0; i < timeStamps.length; i++) {
 
-        for (let i = 0; i < timeStamps.length; i++) {
-          const dayTimeStamp = timeStamps[i]
+        const dayTimeStamp = timeStamps[i]
+        let wallets: Set<string> = new Set()
+        let walletsWithBalanceLessThanOne = 0
+
+        for (let node of edges) {
+          const address = node.node.id
+          const outputs = node.node.outputsByPublicKey.edges
+          const inputs = node.node.inputsByPublicKey.edges
+
+          if (inputs.length <= 0 && outputs.length <= 0 ) { continue }
 
           let outputAmount = 0
           let inputAmount = 0
@@ -86,28 +88,21 @@ const getShrimpPercentage = (timeStamp: number): Promise<ShrimpPercentage[]> => 
             }
           }
 
-          const index = 29 - i
           const balanceAmount = outputAmount - inputAmount
           if (balanceAmount < 1) {
-            const percentage = wallets.size / data.data.allBtcWallets.edges.length * 100
-            shrimps[index] = {
-              timestamp: dayTimeStamp,
-              percentage: percentage
-            }
-          } else {
-            shrimps[index] = {
-              timestamp: dayTimeStamp,
-              percentage: 0
-            }
+            walletsWithBalanceLessThanOne++
           }
-          
+        }
+        const totalWallets = wallets.size
+        const percentage = (totalWallets > 0) ? (walletsWithBalanceLessThanOne / totalWallets) * 100 : 0
+        shrimps[i] = {
+          timestamp: dayTimeStamp,
+          percentage: parseFloat(percentage.toFixed(2)),
         }
       }
-      console.log(shrimps)
       return shrimps
     })
 }
-
 
 export const GetshrimpPercentChart = ({ timeStamp }: { timeStamp: number }): JSX.Element => {
   const [chartData, setChartData] = useState<ShrimpPercentage[]>([])
