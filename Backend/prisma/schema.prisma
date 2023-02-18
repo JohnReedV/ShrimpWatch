@@ -21,6 +21,8 @@ model btcWallet {
     nonce   Decimal? @db.Decimal
     input   input[]
     output  output[]
+
+    @@index([id])
 }
 
 model btcTransaction {
