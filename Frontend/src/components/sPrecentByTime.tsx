@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000/graphql'
 })
 
-const getShrimpPercentage = async (timeStamp: number, dates: number): Promise<ShrimpPercentage[]> => {
+async function getShrimpPercentage(timeStamp: number, dates: number): Promise<ShrimpPercentage[]> {
   const timeStamps: number[] = Array.from({ length: dates }, (_, i) => timeStamp - (dates - i - 1) * 86400)
   const shrimps: ShrimpPercentage[] = Array.from({ length: dates }, () => ({ timestamp: 0, percentage: 0 }))
   const greatTimeStamp = Math.max(...timeStamps)
@@ -43,7 +43,6 @@ const getShrimpPercentage = async (timeStamp: number, dates: number): Promise<Sh
       }
     `,
   })
-
   const edges = data?.data?.allBtcWallets?.edges ?? []
 
   for (let i = 0; i < timeStamps.length; i++) {
@@ -89,7 +88,6 @@ const getShrimpPercentage = async (timeStamp: number, dates: number): Promise<Sh
       percentage: +percentage.toFixed(2),
     }
   }
-  console.log(shrimps)
   return shrimps
 }
 
