@@ -117,7 +117,7 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
   }, [])
 
   const data: [number, number | null][] = chartData.map((item) => {
-    return [Number(item.x), item.y];
+    return [Number(item.x), item.y]
   })
   
   const options: Highcharts.Options = {
@@ -126,8 +126,8 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
       backgroundColor: {
         linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
         stops: [
-          [0, '#292E49'],
-          [1, '#536976'],
+          [0, '#24283a'],
+          [1, '#3a3f5c']
         ],
       },
       borderRadius: 10,
@@ -142,6 +142,7 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
       style: {
         color: '#fff',
         fontWeight: 'bold',
+        fontSize: '24px',
       },
     },
     xAxis: {
@@ -149,8 +150,10 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
       labels: {
         style: {
           color: '#fff',
+          fontSize: '16px',
         },
       },
+      lineColor: '#444',
     },
     yAxis: {
       title: {
@@ -158,15 +161,18 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
         style: {
           color: '#fff',
           fontWeight: 'bold',
+          fontSize: '18px',
         },
       },
       labels: {
         style: {
           color: '#fff',
+          fontSize: '16px',
         },
-        format: '{value}%'
+        format: '{value}%',
       },
       gridLineColor: '#444',
+      lineColor: '#444',
     },
     legend: {
       enabled: false,
@@ -175,29 +181,27 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
       {
         name: 'Shrimp Percentage',
         data: data,
-        type: 'area',
+        type: 'line',
         color: {
           linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
           stops: [
-            [0, '#D4145A'],
-            [1, '#FBB03B']
+            [0, '#91f9ac'],
+            [1, '#19c09d']
           ]
         },
         lineWidth: 3,
         marker: {
           symbol: 'circle',
           radius: 5,
-          fillColor: '#000000',
+          fillColor: '#fff',
           lineWidth: 2,
-          lineColor: '#D4145A',
+          lineColor: '#fcff8c',
           animation: true,
-        },
-        fillColor: {
-          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-          stops: [
-            [0, 'rgba(212, 20, 90, 0.5)'],
-            [1, 'rgba(251, 176, 59, 0.5)']
-          ]
+          states: {
+            hover: {
+              fillColor: '#fcff8c',
+            }
+          },
         },
       },
     ],
