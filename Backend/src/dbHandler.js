@@ -267,128 +267,111 @@ export class DBHandler {
         }).catch((e) => { })
     }
 
-    async fillWalletEth(transaction, web3, timeStamp, type) {
-
-        if (type == "toContract") {
-            const nonceFrom = await web3.eth.getTransactionCount(transaction.from, 'latest')
-            const blanceFromWei = await web3.eth.getBalance(transaction.from)
-            const blanceFrom = await web3.utils.fromWei(blanceFromWei, 'ether')
-            const balanceFromAtBlock = await web3.eth.getBalance(transaction.from, transaction.blockNumber)
-
-            const pkgFrom = {
-                id: transaction.from.toLowerCase(),
-                balance: parseFloat(blanceFrom),
-                nonce: parseInt(nonceFrom)
-            }
-
-            await this.prisma.evmWallet.upsert({
-                where: { id: pkgFrom.id },
-                update: pkgFrom,
-                create: pkgFrom
-            }).catch((e) => { })
-
-            const pkgFromHistory = {
-                id: md5(`${transaction.hash}${transaction.from.toLowerCase()}${transaction.transactionIndex}`),
-                walletId: transaction.from.toLowerCase(),
-                balance: parseFloat(balanceFromAtBlock),
-                timeStamp: timeStamp
-            }
-
-            await this.prisma.balanceHistoryEth.upsert({
-                where: { id: pkgFromHistory.id },
-                update: pkgFromHistory,
-                create: pkgFromHistory
-            }).catch((e) => { })
-
-        } else if (type == "fromContract") {
-            const nonceTo = await web3.eth.getTransactionCount(transaction.to, 'latest')
-            const blanceToWei = await web3.eth.getBalance(transaction.to)
-            const blanceTo = await web3.utils.fromWei(blanceToWei, 'ether')
-            const balanceToAtBlock = await web3.eth.getBalance(transaction.to, transaction.blockNumber)
-
-            const pkgTo = {
-                id: transaction.to.toLowerCase(),
-                balance: parseFloat(blanceTo),
-                nonce: parseInt(nonceTo)
-            }
-
-            await this.prisma.evmWallet.upsert({
-                where: { id: pkgTo.id },
-                update: pkgTo,
-                create: pkgTo
-            }).catch((e) => { })
-
-            const pkgToHistory = {
-                id: md5(`${transaction.hash}${transaction.to.toLowerCase()}${transaction.transactionIndex}`),
-                walletId: transaction.to.toLowerCase(),
-                balance: parseFloat(balanceToAtBlock),
-                timeStamp: timeStamp
-            }
-
-            await this.prisma.balanceHistoryEth.upsert({
-                where: { id: pkgToHistory.id },
-                update: pkgToHistory,
-                create: pkgToHistory
-            }).catch((e) => { })
-
-        } else if (type == "regular") {
-            const nonceTo = await web3.eth.getTransactionCount(transaction.to, 'latest')
-            const blanceToWei = await web3.eth.getBalance(transaction.to)
-            const blanceTo = await web3.utils.fromWei(blanceToWei, 'ether')
-
-            const nonceFrom = await web3.eth.getTransactionCount(transaction.from, 'latest')
-            const blanceFromWei = await web3.eth.getBalance(transaction.from)
-            const blanceFrom = await web3.utils.fromWei(blanceFromWei, 'ether')
-
-            const pkgFrom = {
-                id: transaction.from.toLowerCase(),
-                balance: parseFloat(blanceFrom),
-                nonce: parseInt(nonceFrom)
-            }
-
-            const pkgTo = {
-                id: transaction.to.toLowerCase(),
-                balance: parseFloat(blanceTo),
-                nonce: parseInt(nonceTo)
-            }
-
-            await this.prisma.evmWallet.upsert({
-                where: { id: pkgTo.id },
-                update: pkgTo,
-                create: pkgTo
-            }).catch((e) => { })
-
-            await this.prisma.evmWallet.upsert({
-                where: { id: pkgFrom.id },
-                update: pkgFrom,
-                create: pkgFrom
-            }).catch((e) => { })
-
-            const pkgToHistory = {
-                id: md5(`${transaction.hash}${transaction.to.toLowerCase()}${transaction.transactionIndex}`),
-                walletId: transaction.to.toLowerCase(),
-                balance: parseFloat(blanceTo),
-                timeStamp: timeStamp
-            }
-
-            const pkgFromHistory = {
-                id: md5(`${transaction.hash}${transaction.from.toLowerCase()}${transaction.transactionIndex}`),
-                walletId: transaction.from.toLowerCase(),
-                balance: parseFloat(blanceFrom),
-                timeStamp: timeStamp
-            }
-
-            await this.prisma.balanceHistoryEth.upsert({
-                where: { id: pkgToHistory.id },
-                update: pkgToHistory,
-                create: pkgToHistory
-            }).catch((e) => { })
-
-            await this.prisma.balanceHistoryEth.upsert({
-                where: { id: pkgFromHistory.id },
-                update: pkgFromHistory,
-                create: pkgFromHistory
-            }).catch((e) => { })
+    async fillWalletEthToContract(transaction, timeStamp, nonceFrom, balanceFrom, balanceFromAtBlock) {
+        const pkgFrom = {
+            id: transaction.from.toLowerCase(),
+            balance: parseFloat(balanceFrom),
+            nonce: parseInt(nonceFrom)
         }
+
+        await this.prisma.evmWallet.upsert({
+            where: { id: pkgFrom.id },
+            update: pkgFrom,
+            create: pkgFrom
+        }).catch((e) => { })
+
+        const pkgFromHistory = {
+            id: md5(`${transaction.hash}${transaction.from.toLowerCase()}${transaction.transactionIndex}`),
+            walletId: transaction.from.toLowerCase(),
+            balance: parseFloat(balanceFromAtBlock),
+            timeStamp: timeStamp
+        }
+
+        await this.prisma.balanceHistoryEth.upsert({
+            where: { id: pkgFromHistory.id },
+            update: pkgFromHistory,
+            create: pkgFromHistory
+        }).catch((e) => { })
+    }
+
+    async fillWalletEthFromContract(transaction, timeStamp, nonceTo, balanceTo, balanceToAtBlock) {
+        const pkgTo = {
+            id: transaction.to.toLowerCase(),
+            balance: parseFloat(balanceTo),
+            nonce: parseInt(nonceTo)
+        }
+
+        await this.prisma.evmWallet.upsert({
+            where: { id: pkgTo.id },
+            update: pkgTo,
+            create: pkgTo
+        }).catch((e) => { })
+
+        const pkgToHistory = {
+            id: md5(`${transaction.hash}${transaction.to.toLowerCase()}${transaction.transactionIndex}`),
+            walletId: transaction.to.toLowerCase(),
+            balance: parseFloat(balanceToAtBlock),
+            timeStamp: timeStamp
+        }
+
+        await this.prisma.balanceHistoryEth.upsert({
+            where: { id: pkgToHistory.id },
+            update: pkgToHistory,
+            create: pkgToHistory
+        }).catch((e) => { })
+    }
+
+    async fillWalletEth(transaction, timeStamp, nonceTo, nonceFrom, balanceTo, balanceFrom) {
+
+        const pkgFrom = {
+            id: transaction.from.toLowerCase(),
+            balance: parseFloat(balanceFrom),
+            nonce: parseInt(nonceFrom)
+        }
+
+        const pkgTo = {
+            id: transaction.to.toLowerCase(),
+            balance: parseFloat(balanceTo),
+            nonce: parseInt(nonceTo)
+        }
+
+        await this.prisma.evmWallet.upsert({
+            where: { id: pkgTo.id },
+            update: pkgTo,
+            create: pkgTo
+        }).catch((e) => { })
+
+        await this.prisma.evmWallet.upsert({
+            where: { id: pkgFrom.id },
+            update: pkgFrom,
+            create: pkgFrom
+        }).catch((e) => { })
+
+        const pkgToHistory = {
+            id: md5(`${transaction.hash}${transaction.to.toLowerCase()}${transaction.transactionIndex}`),
+            walletId: transaction.to.toLowerCase(),
+            balance: parseFloat(balanceTo),
+            timeStamp: timeStamp
+        }
+
+        const pkgFromHistory = {
+            id: md5(`${transaction.hash}${transaction.from.toLowerCase()}${transaction.transactionIndex}`),
+            walletId: transaction.from.toLowerCase(),
+            balance: parseFloat(balanceFrom),
+            timeStamp: timeStamp
+        }
+
+        await this.prisma.balanceHistoryEth.upsert({
+            where: { id: pkgToHistory.id },
+            update: pkgToHistory,
+            create: pkgToHistory
+        }).catch((e) => { })
+
+        await this.prisma.balanceHistoryEth.upsert({
+            where: { id: pkgFromHistory.id },
+            update: pkgFromHistory,
+            create: pkgFromHistory
+        }).catch((e) => { })
+
     }
 }

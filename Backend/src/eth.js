@@ -38,21 +38,35 @@ class Eth {
             if (transaction.input === '0x' && transaction.value > 0) {
                 //regular eth transfer
                 if (await this.isContract(transaction.to)) {
-                    //transfer to contract
+                    const nonceFrom = await this.web3.eth.getTransactionCount(transaction.from, 'latest')
+                    const blanceFromWei = await this.web3.eth.getBalance(transaction.from)
+                    const blanceFrom = this.web3.utils.fromWei(blanceFromWei, 'ether')
+                    const balanceFromAtBlock = await this.web3.eth.getBalance(transaction.from, transaction.blockNumber)
+
                     this.lock.lock()
-                    await this.db.fillWalletEth(transaction, this.web3, "toContract")
+                    await this.db.fillWalletEthToContract(transaction, currentBlock.timestamp, nonceFrom, blanceFrom, balanceFromAtBlock)
                     await this.db.fillTransactionEth(transaction, currentBlock, "toContract")
                     this.lock.unlock()
                 } else if (await this.isContract(transaction.from)) {
-                    //transfer from contract
+                    const nonceTo = await this.web3.eth.getTransactionCount(transaction.to, 'latest')
+                    const blanceToWei = await this.web3.eth.getBalance(transaction.to)
+                    const balanceTo = this.web3.utils.fromWei(blanceToWei, 'ether')
+                    const balanceToAtBlock = await this.web3.eth.getBalance(transaction.to, transaction.blockNumber)
+
                     this.lock.lock()
-                    await this.db.fillWalletEth(transaction, this.web3, "fromContract")
+                    await this.db.fillWalletEthFromContract(transaction, currentBlock.timestamp, nonceTo, balanceTo, balanceToAtBlock)
                     await this.db.fillTransactionEth(transaction, currentBlock, "fromContract")
                     this.lock.unlock()
                 } else {
-                    // regular transfer
+                    const nonceTo = await this.web3.eth.getTransactionCount(transaction.to, 'latest')
+                    const blanceToWei = await this.web3.eth.getBalance(transaction.to)
+                    const balanceTo = this.web3.utils.fromWei(blanceToWei, 'ether')
+                    const nonceFrom = await this.web3.eth.getTransactionCount(transaction.from, 'latest')
+                    const blanceFromWei = await this.web3.eth.getBalance(transaction.from)
+                    const balanceFrom = this.web3.utils.fromWei(blanceFromWei, 'ether')
+
                     this.lock.lock()
-                    await this.db.fillWalletEth(transaction, this.web3, currentBlock.timestamp, "regular")
+                    await this.db.fillWalletEth(transaction, currentBlock.timestamp, nonceTo, nonceFrom, balanceTo, balanceFrom)
                     await this.db.fillTransactionEth(transaction, currentBlock, "regular")
                     this.lock.unlock()
                 }
