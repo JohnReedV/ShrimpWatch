@@ -39,7 +39,7 @@ class Btc {
             let rawTX = await this.btcQ.getRawTX(block.tx[i], blockHash)
             let decodedTX = await this.btcQ.getDecodedTX(rawTX.hex)
 
-            if (this.isCoinbase(decodedTX)) { //coinbase transactions are mints with no sender
+            if (decodedTX.vin[0].coinbase) { //coinbase transactions are mints with no sender
 
                 let coinbases = []
                 for (let c = 0; c < decodedTX.vout.length; c++) {
@@ -105,10 +105,6 @@ class Btc {
             }
         }
         return senders
-    }
-
-    isCoinbase(decodedTX) {
-        if (decodedTX.vin[0].coinbase) { return true } else { return false }
     }
 }
 
