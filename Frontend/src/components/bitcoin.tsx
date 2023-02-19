@@ -3,9 +3,7 @@ import { GetLatestBitcoinTx } from './latestTxBtc'
 import { GetshrimpPercentChart } from './sPrecentByTime'
 import { QueryClient, QueryClientProvider } from 'react-query'
 
-const queryClient = new QueryClient()
-
-const Bitcoin = () => {
+const Bitcoin = ({ queryClient }: { queryClient: QueryClient }) => {
     return (
         <QueryClientProvider client={queryClient}>
             <div><GetshrimpPercentChart timeStamp={1615310927}  dates={160}/></div>

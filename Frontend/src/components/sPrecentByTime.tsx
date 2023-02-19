@@ -16,7 +16,7 @@ async function getShrimpPercentage(timeStamp: number, dates: number): Promise<Sh
 
   const { data } = await axiosInstance.post('', {
     query: `
-      query MyQuery {
+      query shrimpPrecent {
         allBtcWallets {
           edges {
             node {
