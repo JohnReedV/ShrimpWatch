@@ -48,6 +48,7 @@ model input {
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     wallet    btcWallet?      @relation(fields: [publicKey], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+    @@index([amount])
     @@index([publicKey])
     @@index([timeStamp])
 }
@@ -62,6 +63,7 @@ model output {
     btc       btcTransaction? @relation(fields: [txId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     wallet    btcWallet?      @relation(fields: [publicKey], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+    @@index([amount])
     @@index([publicKey])
     @@index([timeStamp])
 }
