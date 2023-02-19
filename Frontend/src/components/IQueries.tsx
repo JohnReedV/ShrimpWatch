@@ -18,5 +18,5 @@ export interface ShrimpPercentage {
 
 export interface ChartData {
     x: number
-    y: number
+    y: number | null
   }

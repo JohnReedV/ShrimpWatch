@@ -8,7 +8,7 @@ const queryClient = new QueryClient()
 const Bitcoin = () => {
     return (
         <QueryClientProvider client={queryClient}>
-            <div><GetshrimpPercentChart timeStamp={1605310927}  dates={30}/></div>
+            <div><GetshrimpPercentChart timeStamp={1615310927}  dates={160}/></div>
         </QueryClientProvider>
     )
 }

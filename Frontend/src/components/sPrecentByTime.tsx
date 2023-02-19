@@ -116,8 +116,10 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
     fetchAllShrimpData()
   }, [])
 
-  const chartRef = useRef<HighchartsReact>(null)
-
+  const data: [number, number | null][] = chartData.map((item) => {
+    return [Number(item.x), item.y];
+  })
+  
   const options: Highcharts.Options = {
     chart: {
       type: 'line',
@@ -169,16 +171,11 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
     legend: {
       enabled: false,
     },
-    tooltip: {
-      formatter: function () {
-        return '<b>' + Highcharts.dateFormat('%e %b %y', this.x) + '</b><br/>' +
-          this.series.name + ': ' + this.y + '%'
-      }
-    },
     series: [
       {
         name: 'Shrimp Percentage',
-        data: chartData,
+        data: data,
+        type: 'area',
         color: {
           linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
           stops: [
@@ -210,7 +207,7 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
       {isLoading && <Loading />}
       {error && <p>An error occurred</p>}
       {!isLoading && !error && (
-        <HighchartsReact highcharts={Highcharts} options={options} ref={chartRef} />
+        <HighchartsReact highcharts={Highcharts} options={options} />
       )}
     </>
   )
