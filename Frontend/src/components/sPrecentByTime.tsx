@@ -88,6 +88,7 @@ async function getShrimpPercentage(timeStamp: number, dates: number): Promise<Sh
       percentage: +percentage.toFixed(2),
     }
   }
+  console.log(shrimps)
   return shrimps
 }
 
@@ -96,25 +97,26 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
 
-  const fetchAllShrimpData = async () => {
-    try {
-      const data: ShrimpPercentage[] = await getShrimpPercentage(timeStamp, dates)
-      const chartData: ChartData[] = data.map((item) => ({
-        x: item.timestamp * 1000,
-        y: item.percentage,
-      }))
-      chartData[0].y = null
-      chartData[chartData.length - 1].y = null
-      setChartData(chartData)
-      setIsLoading(false)
-    } catch (err) {
-      setError(true)
-    }
-  }
-
   useEffect(() => {
+    const fetchAllShrimpData = async () => {
+      try {
+        const data: ShrimpPercentage[] = await getShrimpPercentage(timeStamp, dates)
+        const chartData: ChartData[] = data.map((item) => ({
+          x: item.timestamp * 1000,
+          y: item.percentage,
+        }))
+        chartData[0].y = null
+        chartData[chartData.length - 1].y = null
+        setChartData(chartData)
+        setIsLoading(false)
+      } catch (err) {
+        setError(true)
+      }
+    }
+
     fetchAllShrimpData()
-  }, [])
+  }, [timeStamp, dates])
+
 
   const data: [number, number | null][] = chartData.map((item) => {
     return [Number(item.x), item.y]
