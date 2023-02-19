@@ -2,24 +2,32 @@ import { Worker } from 'worker_threads'
 import * as fs from 'fs'
 import Web3 from 'web3'
 import { btcQueries } from './btcQueries.js'
+import { Lock } from './atomicLock.js'
 
 class ShrimpWatch {
     conf
+    lockBtc
+    lockEth
 
     async start() {
+        this.lockBtc = new Lock()
+        this.lockEth = new Lock()
         this.conf = JSON.parse(fs.readFileSync('./conf.json', 'utf8'))
         let numWorkers = Math.round(this.conf.workerPoolSize)
 
         if (this.conf.btcOn && this.conf.ethOn) {
-            numWorkers = numWorkers -= 1
+            if (numWorkers % 2 !== 0) {
+                numWorkers = (numWorkers - 1) / 2
+                console.log(`Number of workers is not divisible by 2, using ${numWorkers} workers for each blockchain`)
+            } else { numWorkers = numWorkers / 2 }
 
-            this.computeBtc(1)
+            this.computeBtc(numWorkers)
             this.computeEth(numWorkers)
         } else if (this.conf.btcOn) {
-            this.computeBtc(1)
+            this.computeBtc(numWorkers)
         } else if (this.conf.ethOn) {
             this.computeEth(numWorkers)
-        } else { console.log('uhhh turn something on dude')}
+        } else { console.log('uhhh turn something on dude') }
 
     }
 
@@ -35,7 +43,11 @@ class ShrimpWatch {
                 blockNumber++
             }
             btcCompletedBlocks.add(blockNumber)
-            const btcWorker = new Worker('./src/btc.js')
+            const btcWorker = new Worker('./src/btc.js', {
+                workerData: {
+                    iab: this.lockBtc.iab
+                }
+            })
             btcWorker.postMessage({ blockNumber })
             btcWorkers.push(btcWorker)
         }
@@ -76,7 +88,11 @@ class ShrimpWatch {
                 blockNumber++
             }
             ethCompletedBlocks.add(blockNumber)
-            const ethWorker = new Worker('./src/eth.js')
+            const ethWorker = new Worker('./src/eth.js', {
+                workerData: {
+                    iab: this.lockEth.iab
+                }
+            })
             ethWorker.postMessage({ blockNumber })
             ethWorkers.push(ethWorker)
         }

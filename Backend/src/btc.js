@@ -1,14 +1,16 @@
-import { parentPort } from 'worker_threads'
+import { parentPort, workerData } from 'worker_threads'
 import { btcQueries } from './btcQueries.js'
 import { DBHandler } from './dbHandler.js'
 import * as fs from 'fs'
 import Bitcore from "bitcore-lib"
+import { Lock } from './atomicLock.js'
 
 class Btc {
     conf
     db
     btcQ
     blockNumber
+    lock
 
     constructor() {
         this.btcQ = new btcQueries()
@@ -16,11 +18,11 @@ class Btc {
         this.conf = JSON.parse(fs.readFileSync('./conf.json', 'utf8'))
 
         parentPort.on('message', async (message) => {
+            this.lock = new Lock(workerData.iab)
             this.blockNumber = message.blockNumber
             console.log("Working on BTC block : " + this.blockNumber)
 
             this.startBtc().then(async () => {
-                await this.db.endBlockBtc(this.blockNumber)
                 parentPort.postMessage({ done: true, blockNumber: this.blockNumber })
             }).catch((e) => {
                 console.log(`Error on BTC block: ${this.blockNumber} Message: ${e} :end message`)
@@ -51,16 +53,20 @@ class Btc {
                         })
                     }
                 }
+                this.lock.lock()
+                await this.db.endBlockBtc(this.blockNumber)
                 await this.db.fillCoinbase(coinbases, rawTX, block)
-
+                this.lock.unlock()
             }
             else {
                 let senders = await this.getSenders(rawTX.hex)
                 let receivers = await this.getReceivers(decodedTX)
 
+                this.lock.lock()
+                await this.db.endBlockBtc(this.blockNumber)
                 await this.db.fillTransactionBtc(rawTX, senders, receivers, block)
                 await this.db.fillBtcWallet(senders, receivers, rawTX.txid, parseFloat(block.time))
-
+                this.lock.unlock()
             }
         }
     }
