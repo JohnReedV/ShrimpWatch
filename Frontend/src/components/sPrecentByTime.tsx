@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react'
-import { ShrimpPercentage, ChartData } from './IQueries'
+import { ShrimpPercentage, ChartData, ShrimpData } from './IQueries'
 import axios from 'axios'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import '../styles/Loading.css'
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5000/graphql'
-})
-
 async function getShrimpPercentage(timeStamp: number, dates: number): Promise<ShrimpPercentage[]> {
-  const { data } = await axiosInstance.post('', {
+
+  const axiosInstance = axios.create({ baseURL: 'http://localhost:5000/graphql' })
+  const { data } = await axiosInstance.post<ShrimpData>('', {
     query: `query shrimpPercent {
       allInputs(filter: {timeStamp: {lessThanOrEqualTo: "${timeStamp}"}}) {
         edges { node { amount timeStamp publicKey } }
@@ -89,7 +87,7 @@ export const GetshrimpPercentChart = ({ timeStamp, dates }: { timeStamp: number,
   const data: [number, number | null][] = chartData.map((item) => {
     return [Number(item.x), item.y]
   })
-  
+
   const options: Highcharts.Options = {
     chart: {
       type: 'line',

@@ -23,26 +23,24 @@ export interface ChartData {
 
 export interface ShrimpData {
     data: {
-      data: {
         allInputs: {
-          edges: {
-            node: {
-              amount: string;
-              timeStamp: string;
-              publicKey: string;
-            };
-          }[];
+            edges: {
+                node: {
+                    amount: number
+                    timeStamp: number
+                    publicKey: string
+                };
+            }[];
         };
         allOutputs: {
-          edges: {
-            node: {
-              amount: string;
-              timeStamp: string;
-              publicKey: string;
-            };
-          }[];
+            edges: {
+                node: {
+                    amount: number
+                    timeStamp: number
+                    publicKey: string
+                };
+            }[];
         };
-      };
     };
-  }
-  
+
+}
