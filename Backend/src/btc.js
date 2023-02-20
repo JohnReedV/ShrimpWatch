@@ -16,9 +16,9 @@ class Btc {
         this.btcQ = new btcQueries()
         this.db = new DBHandler()
         this.conf = JSON.parse(fs.readFileSync('./conf.json', 'utf8'))
+        this.lock = new Lock(workerData.iab)
 
         parentPort.on('message', async (message) => {
-            this.lock = new Lock(workerData.iab)
             this.blockNumber = message.blockNumber
             console.log("Working on BTC block : " + this.blockNumber)
 
