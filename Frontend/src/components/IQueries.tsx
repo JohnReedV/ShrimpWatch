@@ -19,4 +19,30 @@ export interface ShrimpPercentage {
 export interface ChartData {
     x: number
     y: number | null
+}
+
+export interface ShrimpData {
+    data: {
+      data: {
+        allInputs: {
+          edges: {
+            node: {
+              amount: string;
+              timeStamp: string;
+              publicKey: string;
+            };
+          }[];
+        };
+        allOutputs: {
+          edges: {
+            node: {
+              amount: string;
+              timeStamp: string;
+              publicKey: string;
+            };
+          }[];
+        };
+      };
+    };
   }
+  
