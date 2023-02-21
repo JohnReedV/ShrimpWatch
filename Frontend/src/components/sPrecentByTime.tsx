@@ -32,7 +32,7 @@ async function getShrimpPercentage(timeStamp: number, dates: number): Promise<Sh
     if (timeStamp > timeStamp - dayInSeconds) {
       break
     }
-    walletBalances[publicKey] = (walletBalances[publicKey] || 0) + Number(amount)
+    walletBalances[publicKey] = (walletBalances[publicKey] || 0) + parseFloat(amount.toString())
   }
 
   for (let i = 0; i < timeStamps.length; i++) {
@@ -41,7 +41,7 @@ async function getShrimpPercentage(timeStamp: number, dates: number): Promise<Sh
     for (let { node } of [...allInputs, ...allOutputs]) {
       const { amount, publicKey, timeStamp } = node
       if (timeStamp <= dayTimeStamp) {
-        walletBalances[publicKey] = (walletBalances[publicKey] || 0) + Number(amount)
+        walletBalances[publicKey] = (walletBalances[publicKey] || 0) + parseFloat(amount.toString())
       } else {
         break
       }
