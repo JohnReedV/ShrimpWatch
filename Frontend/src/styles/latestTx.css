@@ -1,0 +1,61 @@
+.latest-tx-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background: linear-gradient(to right, #3a3f5c, #24283a);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+  }
+  
+  .latest-tx-heading {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #FFF;
+}
+
+.latest-tx-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.latest-tx-item {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: transparent;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.latest-tx-label {
+    font-weight: bold;
+    font-size: 16px;
+    color: #FFF;
+}
+
+.latest-tx-id {
+    margin-bottom: 10px;
+    font-size: 8px;
+    color: #3dd1a4;
+}
+
+.latest-tx-amount {
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #3dd1a4;
+}
+
+.latest-tx-timestamp {
+    margin-bottom: 0;
+    font-size: 16px;
+    color: #3dd1a4;
+}
+
+.latest-tx-error {
+    margin-top: 20px;
+    margin-bottom: 0;
+    font-size: 16px;
+    color: #f00;
+}
