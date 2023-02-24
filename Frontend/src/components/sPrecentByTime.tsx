@@ -47,7 +47,7 @@ async function getShrimpPercentage(timeStamp: number, dates: number): Promise<Sh
       }
     }
 
-    const walletsWithBalanceLessThanOne = Object.values(walletBalances).filter(balance => balance > 0 && balance < 1).length
+    const walletsWithBalanceLessThanOne = Object.values(walletBalances).filter(balance => balance > 0.0001 && balance < 1).length
     const totalWallets = Object.keys(walletBalances).length
     const percentage = totalWallets > 0 ? (walletsWithBalanceLessThanOne / totalWallets) * 100 : 0
 
