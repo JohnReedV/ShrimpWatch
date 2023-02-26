@@ -1,13 +1,10 @@
-import {useEffect, useState} from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import '../styles/Loading.css'
 import { ShrimpDataEth, ShrimpPercentage, ChartData } from './IQueries'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5000/graphql'
-})
 
 async function getShrimpPercentage(timeStamp: number, dates: number): Promise<ShrimpPercentage[]> {
 
@@ -15,7 +12,7 @@ async function getShrimpPercentage(timeStamp: number, dates: number): Promise<Sh
   const { data } = await axiosInstance.post<ShrimpDataEth>('', {
     query: `query ethShrimpPrecent {
       balanceHistoryEthsFiltered: allBalanceHistoryEths(
-        filter: {timeStamp: {lessThanOrEqualTo: "10000000000"}}
+        filter: {timeStamp: {lessThanOrEqualTo: "${timeStamp}"}}
       ) {
         nodes {
           balance
@@ -48,11 +45,11 @@ async function getShrimpPercentage(timeStamp: number, dates: number): Promise<Sh
     }
 
     const totalWallets = wallets.size
-    const shrimip: ShrimpPercentage = {
-      timestamp: dayTimeStamp,
-      percentage: (shrimpCount / totalWallets) * 100 
-    }
-    shrimps.push(shrimip)
+    const percentage = (shrimpCount / totalWallets) * 100
+    console.log(totalWallets)
+    console.log(shrimpCount)
+    shrimps[s].timestamp = dayTimeStamp
+    shrimps[s].percentage = percentage
   }
   console.log(shrimps)
   return shrimps
