@@ -1,7 +1,22 @@
 import { Component } from 'react'
+import { GetshrimpPercentChartEth } from './sPrecentByTimeEth'
+import { QueryClient, QueryClientProvider } from 'react-query'
 
-export class Ethereum {
-    eth() {
-        return <h3>ethpage</h3>
-    }
+const Eth = ({ queryClient }: { queryClient: QueryClient }) => {
+    return (
+        <QueryClientProvider client={queryClient}>
+            <div>
+                <h1>ShrimpWatch
+                    <a href="https://shrimpwatch.com" target="_blank">
+                        <img src="src/assets/shrimp512.png" className="logo" alt="ShrimpWatch Logo" />
+                    </a>
+                </h1>
+            </div>
+            <div>
+                <GetshrimpPercentChartEth timeStamp={1619310927} dates={160} />
+            </div>
+        </QueryClientProvider>
+    )
 }
+
+export default Eth

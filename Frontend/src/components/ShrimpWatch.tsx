@@ -1,11 +1,10 @@
 import { Component } from 'react'
 import '../styles/ShrimpWatch.css'
 import Bitcoin from './bitcoin'
-import { Ethereum } from './ethereum'
+import Eth from './ethereum'
 import { QueryClient, QueryClientProvider } from 'react-query'
 
 class ShrimpWatch extends Component {
-  ethereum = new Ethereum()
   queryClinet = new QueryClient()
 
   handleBtcButtonClick = () => {
@@ -50,7 +49,7 @@ class ShrimpWatch extends Component {
       
     }
     else if (this.state.ethbutton) {
-      return this.ethereum.eth()
+      return <Eth queryClient={this.queryClinet}/>
     }
     else {
       return this.state.default

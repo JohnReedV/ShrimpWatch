@@ -44,3 +44,15 @@ export interface ShrimpData {
     };
 
 }
+
+export interface ShrimpDataEth {
+    data: {
+        balanceHistoryEthsFiltered: {
+            nodes: {
+                balance: number
+                timeStamp: number
+                walletId: string
+            }[]
+        }
+    }
+}
