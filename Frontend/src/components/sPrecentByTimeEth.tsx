@@ -33,7 +33,7 @@ async function getShrimpPercentage(timeStamp: number, dates: number): Promise<Sh
     const dayTimeStamp = timeStamps[s]
     let shrimpCount = 0
 
-    let wallets = new Set()
+    const wallets = new Set()
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i]
       if (node.timeStamp <= dayTimeStamp) {
@@ -46,12 +46,9 @@ async function getShrimpPercentage(timeStamp: number, dates: number): Promise<Sh
 
     const totalWallets = wallets.size
     const percentage = (shrimpCount / totalWallets) * 100
-    console.log(totalWallets)
-    console.log(shrimpCount)
     shrimps[s].timestamp = dayTimeStamp
-    shrimps[s].percentage = percentage
+    shrimps[s].percentage = +percentage.toFixed(2)
   }
-  console.log(shrimps)
   return shrimps
 }
 
