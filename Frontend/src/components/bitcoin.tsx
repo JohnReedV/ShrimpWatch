@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { GetLatestBitcoinTx } from './latestTxBtc'
 import { GetshrimpPercentChart } from './sPrecentByTime'
 import { QueryClient, QueryClientProvider } from 'react-query'
+import '../styles/percentChart.css'
 
 const Bitcoin = ({ queryClient }: { queryClient: QueryClient }) => {
     return (
@@ -13,10 +14,10 @@ const Bitcoin = ({ queryClient }: { queryClient: QueryClient }) => {
                     </a>
                 </h1>
             </div>
-            <div>
+            <div className='precentChart'>
                 <GetshrimpPercentChart timeStamp={1619310927} dates={160} />
             </div>
-            <div>
+            <div className='latestTx'>
                 <GetLatestBitcoinTx />
             </div>
         </QueryClientProvider>

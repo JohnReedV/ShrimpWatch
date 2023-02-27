@@ -1,0 +1,9 @@
+.precentChart {
+    position: relative;
+    right: 15em;
+}
+.latestTx {
+    position: relative;
+    top: -25em;
+    left: 30em;
+}
