@@ -13,7 +13,7 @@ const Eth = ({ queryClient }: { queryClient: QueryClient }) => {
                 </h1>
             </div>
             <div>
-                <GetshrimpPercentChartEth timeStamp={1539330836} dates={30} />
+                <GetshrimpPercentChartEth timeStamp={1539330836} />
             </div>
         </QueryClientProvider>
     )

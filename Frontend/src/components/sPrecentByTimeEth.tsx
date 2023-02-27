@@ -52,35 +52,50 @@ async function getShrimpPercentage(timeStamp: number, dates: number): Promise<Sh
   return shrimps
 }
 
-export const GetshrimpPercentChartEth = ({ timeStamp, dates }: { timeStamp: number, dates: number }): JSX.Element => {
-  const [chartData, setChartData] = useState<ChartData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(false)
+export const GetshrimpPercentChartEth = ({ timeStamp }: { timeStamp: number }): JSX.Element => {
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [selectedTimeRange, setSelectedTimeRange] = useState<'m' | 'w' | 'qm' | 'hy' | 'm' | 'y'>('m');
 
-  useEffect(() => {
-    const fetchAllShrimpData = async () => {
-      try {
-        const data: ShrimpPercentage[] = await getShrimpPercentage(timeStamp, dates)
+  const handleButtonClick = (timeRange: 'w' | 'm' | 'qm' | 'hy' | 'y') => {
+    let days = 1;
+    if (timeRange === 'w') {
+      days = 7;
+    } else if (timeRange === 'm') {
+      days = 30;
+    } else if (timeRange === 'qm') {
+      days = 90
+    } else if (timeRange == 'hy') {
+      days = 180
+    } else if (timeRange === 'y') {
+      days = 365;
+    }
+    setSelectedTimeRange(timeRange);
+    setIsLoading(true);
+    getShrimpPercentage(timeStamp, days)
+      .then(data => {
         const chartData: ChartData[] = data.map((item) => ({
           x: item.timestamp * 1000,
           y: item.percentage,
-        }))
-        chartData[0].y = null
-        chartData[chartData.length - 1].y = null
-        setChartData(chartData)
-        setIsLoading(false)
-      } catch (err) {
-        setError(true)
-      }
-    }
+        }));
+        chartData[0].y = null;
+        chartData[chartData.length - 1].y = null;
+        setChartData(chartData);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+      });
+  };
 
-    fetchAllShrimpData()
-  }, [timeStamp, dates])
-
+  useEffect(() => {
+    handleButtonClick(selectedTimeRange);
+  }, [timeStamp]);
 
   const data: [number, number | null][] = chartData.map((item) => {
-    return [Number(item.x), item.y]
-  })
+    return [Number(item.x), item.y];
+  });
 
   const options: Highcharts.Options = {
     chart: {
@@ -171,9 +186,18 @@ export const GetshrimpPercentChartEth = ({ timeStamp, dates }: { timeStamp: numb
   return (
     <>
       {isLoading && <Loading />}
-      {error && <p>An error occurred</p>}
+      {error && <p>An error occurred {error}</p>}
       {!isLoading && !error && (
-        <HighchartsReact highcharts={Highcharts} options={options} />
+        <div>
+          <HighchartsReact highcharts={Highcharts} options={options} />
+          <div className="time-range-buttons">
+            <button className={selectedTimeRange === 'w' ? 'active' : ''} onClick={() => handleButtonClick('w')}>Week</button>
+            <button className={selectedTimeRange === 'm' ? 'active' : ''} onClick={() => handleButtonClick('m')}>Month</button>
+            <button className={selectedTimeRange === 'qm' ? 'active' : ''} onClick={() => handleButtonClick('qm')}>3 Month</button>
+            <button className={selectedTimeRange === 'hy' ? 'active' : ''} onClick={() => handleButtonClick('hy')}>6 Month</button>
+            <button className={selectedTimeRange === 'y' ? 'active' : ''} onClick={() => handleButtonClick('y')}>Year</button>
+          </div>
+        </div>
       )}
     </>
   )
